@@ -24,9 +24,35 @@ library
                      , xml-conduit >= 1.2 && < 1.3
                      , http-conduit >= 2.0 && < 2.2
                      , text >= 0.11
+                     , bytestring >= 0.10
                      , transformers >= 0.3 && < 0.5
+                     , parsers
+                     , resourcet
                      , exceptions
+                     , errors
+                     , time
+                     , old-locale
 
 
   hs-source-dirs:      src
   default-language:    Haskell2010
+
+
+test-suite test
+  type: exitcode-stdio-1.0
+  default-language: Haskell2010
+  main-is: Main.hs
+  ghc-options: -Wall -threaded -rtsopts -O0
+  hs-source-dirs:
+    test/src
+
+  Build-depends:   tasty
+                 , tasty-hunit
+                 , aws-cloudfront
+                 , base
+                 , semigroups
+                 , xml-conduit
+                 , time
+                 , system-filepath
+                 , data-default
+                 , errors

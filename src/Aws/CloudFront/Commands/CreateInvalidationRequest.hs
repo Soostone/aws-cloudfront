@@ -2,8 +2,12 @@
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
+{-# LANGUAGE NoMonomorphismRestriction  #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TypeFamilies               #-}
+
+--TODO: probably remove
+{-# LANGUAGE ScopedTypeVariables        #-}
 -- |
 -- Module: Aws.CloudFront.Commands.CreateInvalidationRequest
 -- Copyright: Copyright © 2015 SooStone, Inc.
@@ -18,19 +22,36 @@
 -- <http://docs.aws.amazon.com/AmazonCloudFront/latest/APIReference/CreateInvalidation.html>
 module Aws.CloudFront.Commands.CreateInvalidationRequest
     ( CreateInvalidationRequest(..)
+    , CreateInvalidationRequestReference(..)
+    , ObjectPath(..)
+    , CreateInvalidationResponse(..)
+    , Invalidation(..)
+    , InvalidationStatus(..)
+    , InvalidationId(..)
+    -- * Exported for testing
+    , parseInvalidation
     ) where
 
 
 -------------------------------------------------------------------------------
 import           Aws.Core
 import           Aws.General
-import           Data.List.NonEmpty  (NonEmpty)
+import           Control.Applicative
+import           Control.Error
+import           Control.Monad.Trans.Resource (throwM)
+import           Data.List.NonEmpty           (NonEmpty (..))
 import           Data.Monoid
-import           Data.Text           (Text)
+import           Data.String
+import           Data.Text                    (Text)
+import qualified Data.Text                    as T
 import           Data.Time
+import           Data.Traversable
 import           Data.Typeable
-import           Text.XML.Cursor     (($/), ($//), (&/), (&//))
-import qualified Text.XML.Cursor     as CU
+import           System.Locale
+import qualified Text.Parser.Char             as PC
+import qualified Text.XML                     as X
+import           Text.XML.Cursor              (($/), ($//), (&/), (&//))
+import qualified Text.XML.Cursor              as X
 -------------------------------------------------------------------------------
 import           Aws.CloudFront.Core
 -------------------------------------------------------------------------------
@@ -41,6 +62,11 @@ newtype CreateInvalidationRequestReference = CreateInvalidationRequestReference 
     createInvalidationRequestReferenceText :: Text
   } deriving (Show, Eq, Ord, Monoid, Typeable)
 
+
+instance AwsType CreateInvalidationRequestReference where
+  toText = toTextText . createInvalidationRequestReferenceText
+  parse = CreateInvalidationRequestReference <$> parseTextText
+
 --TODO: smart constructor nonempty
 --TODO: when do they specify the distribution id
 
@@ -49,6 +75,10 @@ newtype CreateInvalidationRequestReference = CreateInvalidationRequestReference 
 newtype ObjectPath = ObjectPath {
       objectPathText :: Text
     } deriving (Show, Eq, Ord, Monoid, Typeable)
+
+instance AwsType ObjectPath where
+  toText = toTextText . objectPathText
+  parse = ObjectPath <$> parseTextText
 
 
 -------------------------------------------------------------------------------
@@ -77,27 +107,40 @@ instance ResponseConsumer r CreateInvalidationResponse where
   type ResponseMetadata CreateInvalidationResponse = CloudFrontMetadata
   responseConsumer _ = cloudFrontXmlResponseConsumer parse
     where
-      --TODO: is there a monad transformer with throwM
       parse cursor = do
-        cloudFrontCheckResponseType () "Invalidation" cursor
-        let getContentOf n = cursor $/ CU.laxElement n &/ CU.content &/ fromText
-        i <- getContentOf "Id"
-        stat <- getContentOf "Status"
-        ct <- getContentOf "CreateTime"
-        batch <- force "Missing InvalidationBatch" $ cursor
-                 $/ CU.laxElement "InvalidationBatch"
-        cref <- batch $/ "CU.CallerReference"
-                      &/ CU.content
-        paths <- batch $/ CU.laxElement "Paths"
-                       &/ CU.laxElement "Items"
-                       &// CU.laxElement "Path"
-                       &/ CU.content
-        return $ Invalidation { invStatus = stat
-                              , invPaths = paths
-                              , invCallerReference = cref
-                              , invInvalidationId = i
-                              , invCreateTime = ct
-                              }
+        res <- runEitherT $ parseInvalidation cursor
+        case res of
+          Left e -> throwM $ CloudFrontResponseDecodeError $ formatError e
+          Right r -> return $ CreateInvalidationResponse r
+      formatError e = "Failed to parse cloudfront response: " <> (T.pack . show) e
+      --TODO: probably extract
+
+parseInvalidation cursor = do
+  cloudFrontCheckResponseType () "Invalidation" cursor
+  i <- getContentOf cursor "Id"
+  stat <- getContentOf cursor "Status"
+  ct <- awsUTCTime <$> getContentOf cursor "CreateTime"
+  batch :: X.Cursor <- force "Missing InvalidationBatch" $ cursor
+                       $/ X.laxElement "InvalidationBatch"
+  cref <- getContentOf batch "CallerReference"
+  paths :: [Text] <- right $ batch
+                            $/ X.laxElement "Paths"
+                            &/ X.laxElement "Items" --FIXME
+                            &/ X.laxElement "Path"
+                            &/ X.content
+  pathsNE <- case paths of
+    (x:xs) -> hoistEither (traverse fromText' $ x :| xs)
+    _ -> throwT "Empty Paths tag"
+  return $ Invalidation { invStatus = stat
+                        , invPaths = pathsNE
+                        , invCallerReference = cref
+                        , invInvalidationId = i
+                        , invCreateTime = ct
+                        }
+
+getContentOf c n = EitherT . fmap fromText' . force ("Missing element " <> T.unpack n) $
+                   c $/ X.laxElement n &/ X.content
+
 
 -------------------------------------------------------------------------------
 --todo: extract and share in a common types module
@@ -116,8 +159,51 @@ data InvalidationStatus = InvalidationInProgress
                         deriving (Show, Eq, Ord, Typeable)
 
 
+instance AwsType InvalidationStatus where
+  toText InvalidationInProgress = "InProgress"
+  toText InvalidationCompleted = "Completed"
+  parse = parseInProgress <|>
+          parseCompleted
+    where
+      parseInProgress = PC.text "InProgress" *> pure InvalidationInProgress
+      parseCompleted = PC.text "Completed" *> pure InvalidationCompleted
+
+
 -------------------------------------------------------------------------------
 newtype InvalidationId = InvalidationId {
       invalidationIdText :: Text
     } deriving (Show, Eq, Ord, Typeable)
+
+
+instance AwsType InvalidationId where
+  toText = toTextText . invalidationIdText
+  parse = InvalidationId <$> parseTextText
+
+
+-------------------------------------------------------------------------------
+instance AwsType AWSUTCTime where
+  toText = fromString . formatTime defaultTimeLocale awsTimeFmt . awsUTCTime
+  parse = do
+    s <- parseString
+    maybe (fail "could not parse UTCTime") return $ parseTime defaultTimeLocale awsTimeFmt s
+
+
+-------------------------------------------------------------------------------
+awsTimeFmt :: String
+awsTimeFmt = "%Y-%m-%dT%H:%M:%SZ"
+
+
+-------------------------------------------------------------------------------
+newtype AWSUTCTime = AWSUTCTime { awsUTCTime :: UTCTime } deriving (ParseTime)
+
+
+toTextText = fromString . T.unpack
+parseTextText = T.pack <$> parseString
+parseString = many PC.anyChar
+
 --TODO: error cases?
+
+
+-------------------------------------------------------------------------------
+fromText' :: (AwsType a) => Text -> Either Text a
+fromText' = fmapL T.pack . fromText

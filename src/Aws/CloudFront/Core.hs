@@ -8,6 +8,7 @@ import           Aws.Core
 import           Control.Applicative
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class
+import           Data.ByteString        (ByteString)
 import           Data.IORef
 import           Data.Maybe
 import           Data.Monoid
@@ -81,3 +82,20 @@ cloudFrontCheckResponseType :: (MonadThrow m) => a -> Text -> CU.Cursor -> m a
 cloudFrontCheckResponseType a n c = do
   _ <- force ("Expected response type " ++ unpack n) (CU.laxElement n c)
   return a
+
+
+-------------------------------------------------------------------------------
+data CloudFrontErrorResponse
+    = CloudFrontErrorResponse
+        { cloudFrontErrorStatusCode   :: !HTTP.Status
+        , cloudFrontErrorCode         :: !Text
+        , cloudFrontErrorMessage      :: !Text
+        , cloudFrontErrorResource     :: !(Maybe Text)
+        , cloudFrontErrorHostId       :: !(Maybe Text)
+        , cloudFrontErrorAccessKeyId  :: !(Maybe Text)
+        , cloudFrontErrorStringToSign :: !(Maybe ByteString)
+        }
+    | CloudFrontResponseDecodeError Text
+    deriving (Show, Eq, Ord, Typeable)
+
+instance Exception CloudFrontErrorResponse

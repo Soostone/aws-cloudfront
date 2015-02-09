@@ -1,0 +1,15 @@
+<Invalidation xmlns="http://cloudfront.amazonaws.com/doc/2014-11-06/">
+   <Id>123</Id>
+   <Status>InProgress</Status>
+   <CreateTime>2009-11-19T19:37:58Z</CreateTime>
+   <InvalidationBatch>
+      <Paths>
+         <Quantity>3</Quantity>
+         <Items>
+            <Path>/foo/bar.html</Path>
+            <Path>/foo/baz.html</Path>
+         </Items>
+      </Paths>
+      <CallerReference>1234567890</CallerReference>
+   </InvalidationBatch>
+</Invalidation>
