@@ -1,0 +1,32 @@
+name:                aws-cloudfront
+version:             0.0.1
+synopsis:            Bindings for AWS CloudFront
+license:             MIT
+license-file:        LICENSE
+author:              Michael Xavier <michael.xavier@soostone.com>
+maintainer:          Michael Xavier <michael.xavier@soostone.com>
+copyright:           (c) 2015 SooStone Inc.
+category:            Network, Web, AWS, Cloud
+build-type:          Simple
+extra-doc-files:     README.md,
+                     CHANGELOG.md
+cabal-version:       >=1.10
+
+library
+  exposed-modules:    Aws.CloudFront
+                    , Aws.CloudFront.Core
+                    , Aws.CloudFront.Commands.CreateInvalidationRequest
+  build-depends:       base >= 4.6 && < 4.7
+                     , aws  >= 0.10  && < 0.12
+                     , aws-general
+                     , http-types
+                     , semigroups
+                     , xml-conduit >= 1.2 && < 1.3
+                     , http-conduit >= 2.0 && < 2.2
+                     , text >= 0.11
+                     , transformers >= 0.3 && < 0.5
+                     , exceptions
+
+
+  hs-source-dirs:      src
+  default-language:    Haskell2010
