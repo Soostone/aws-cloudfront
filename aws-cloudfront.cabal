@@ -12,6 +12,11 @@ extra-doc-files:     README.md,
                      CHANGELOG.md
 cabal-version:       >=1.10
 
+Flag Development
+  Description: Build in local development mode with fatal warnings.
+  Default: False
+
+
 library
   exposed-modules:    Aws.CloudFront
                     , Aws.CloudFront.Core
@@ -37,17 +42,21 @@ library
   hs-source-dirs:      src
   default-language:    Haskell2010
 
+  if flag(Development)
+    ghc-options: -Wall -Werror
+
 
 test-suite test
   type: exitcode-stdio-1.0
   default-language: Haskell2010
   main-is: Main.hs
-  ghc-options: -Wall -threaded -rtsopts -O0
+  ghc-options: -Wall -Werror -threaded -rtsopts -O0
   hs-source-dirs:
     test/src
 
   Build-depends:   tasty
                  , tasty-hunit
+                 , tasty-quickcheck
                  , aws-cloudfront
                  , base
                  , semigroups
@@ -56,3 +65,4 @@ test-suite test
                  , system-filepath
                  , data-default
                  , errors
+                 , text

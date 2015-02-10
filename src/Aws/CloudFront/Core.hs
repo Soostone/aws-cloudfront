@@ -43,7 +43,7 @@ instance Monoid CloudFrontMetadata where
 
 
 -------------------------------------------------------------------------------
-data CloudFrontConfiguration = CloudFrontConfiguration
+data CloudFrontConfiguration qt = CloudFrontConfiguration
 
 -------------------------------------------------------------------------------
 cloudFrontXmlResponseConsumer
@@ -74,6 +74,7 @@ cloudFrontResponseConsumer inner metadata resp = do
 
 
 -------------------------------------------------------------------------------
+cloudFrontErrorResponseConsumer :: a
 cloudFrontErrorResponseConsumer = undefined
 
 
@@ -99,3 +100,25 @@ data CloudFrontErrorResponse
     deriving (Show, Eq, Ord, Typeable)
 
 instance Exception CloudFrontErrorResponse
+
+
+-------------------------------------------------------------------------------
+data CloudFrontQuery = CloudFrontQuery {
+      cloudFrontQueryMethod     :: !Method
+    , cloudFrontQueryAction     :: !CloudFrontAction
+    , cloudFrontQueryParameters :: !HTTP.QueryText
+    , cloudFrontQueryBody       :: !(Maybe ByteString)
+    }
+
+
+-------------------------------------------------------------------------------
+cloudFrontSignQuery
+    :: CloudFrontQuery
+    -> CloudFrontConfiguration qt
+    -> SignatureData
+    -> SignedQuery
+cloudFrontSignQuery = undefined
+
+
+-------------------------------------------------------------------------------
+data CloudFrontAction = CreateInvalidation
