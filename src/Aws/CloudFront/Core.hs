@@ -236,9 +236,8 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
 
 
 -------------------------------------------------------------------------------
-data CloudFrontAction = CreateInvalidation
+data CloudFrontAction = CreateInvalidation deriving (Show, Eq, Ord, Typeable)
 
---TODO: quickcheck all awstype instances
 --TODO: but why is this needed? i don't think this hits the cloudfront use case
 instance AwsType CloudFrontAction where
   toText CreateInvalidation = "CreateInvalidation"

@@ -3,9 +3,11 @@
 module Aws.CloudFront.TestHelpers where
 
 -------------------------------------------------------------------------------
+import           Aws.General
 import           Control.Applicative
 import           Data.Default
 import           Data.List.NonEmpty    (NonEmpty (..))
+import           Data.String
 import           Filesystem.Path
 import           Prelude               hiding (FilePath)
 import           Test.Tasty.QuickCheck
@@ -30,11 +32,18 @@ fixturePath fp = "test" </> "fixtures" </> fp
 instance Arbitrary ObjectPath where
   arbitrary = ObjectPath <$> arbitrary
 
+
 instance Arbitrary CreateInvalidationRequestReference where
   arbitrary = CreateInvalidationRequestReference <$> arbitrary
 
+
 instance Arbitrary DistributionId where
   arbitrary = DistributionId <$> arbitrary
+
+
+instance Arbitrary InvalidationId where
+  arbitrary = InvalidationId <$> arbitrary
+
 
 instance Arbitrary a => Arbitrary (NonEmpty a) where
   arbitrary = (:|) <$> arbitrary <*> arbitrary
@@ -45,3 +54,19 @@ instance Arbitrary CreateInvalidationRequest where
               <$> arbitrary
               <*> arbitrary
               <*> arbitrary
+
+
+instance Arbitrary InvalidationStatus where
+  arbitrary = oneof [ pure InvalidationInProgress
+                    , pure InvalidationCompleted
+                    ]
+
+
+instance Arbitrary CloudFrontAction where
+  arbitrary = oneof [ pure CreateInvalidation
+                    ]
+
+
+-------------------------------------------------------------------------------
+prop_AWSType_cycle :: (AwsType a, Arbitrary a, Show a, Eq a) => a -> Property
+prop_AWSType_cycle a = fromText (fromString (toText a)) === Right a

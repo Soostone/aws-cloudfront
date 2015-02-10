@@ -68,3 +68,4 @@ test-suite test
                  , data-default
                  , errors
                  , text
+                 , aws-general

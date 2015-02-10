@@ -1,4 +1,5 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Aws.CloudFront.Tests.Commands.CreateInvalidationRequest
     ( tests
     ) where
@@ -26,6 +27,14 @@ tests :: TestTree
 tests = testGroup "Aws.CloudFront.Commands.CreateInvalidationRequest"
   [ parseInvalidationTests
   , renderCIRTests
+  , testProperty "CreateInvalidationRequestReference AWSType" $ \(cirr :: CreateInvalidationRequestReference) ->
+    prop_AWSType_cycle cirr
+  , testProperty "ObjectPath AWSType" $ \(op :: ObjectPath) ->
+    prop_AWSType_cycle op
+  , testProperty "InvalidationStatus AWSType" $ \(is :: InvalidationStatus) ->
+    prop_AWSType_cycle is
+  , testProperty "InvalidationId AWSType" $ \(ii :: InvalidationId) ->
+    prop_AWSType_cycle ii
   ]
 
 
