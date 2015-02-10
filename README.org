@@ -11,3 +11,4 @@
 ** TODO Travis CI setup
 ** TODO Strictness analysis
 ** TODO Stronger error types
+** TODO should we share some type instead of deriving our own for ObjectKey?

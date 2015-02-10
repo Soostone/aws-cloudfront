@@ -30,6 +30,7 @@ library
                      , http-conduit >= 2.0 && < 2.2
                      , text >= 0.11
                      , bytestring >= 0.10
+                     , blaze-builder
                      , transformers >= 0.3 && < 0.5
                      , parsers
                      , resourcet
@@ -37,6 +38,7 @@ library
                      , errors
                      , time
                      , old-locale
+                     , conduit
 
 
   hs-source-dirs:      src

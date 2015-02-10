@@ -16,9 +16,6 @@ import           Test.Tasty.HUnit
 import           Test.Tasty.QuickCheck
 import           Text.XML
 import           Text.XML.Cursor
-
--- import Debug.Trace
--- import qualified Data.Text.Lazy as LT
 -------------------------------------------------------------------------------
 import           Aws.CloudFront.Commands.CreateInvalidationRequest
 import           Aws.CloudFront.TestHelpers
