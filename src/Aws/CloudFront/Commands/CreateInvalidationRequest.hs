@@ -24,7 +24,6 @@
 module Aws.CloudFront.Commands.CreateInvalidationRequest
     ( CreateInvalidationRequest(..)
     , CreateInvalidationRequestReference(..)
-    , ObjectPath(..)
     , CreateInvalidationResponse(..)
     , Invalidation(..)
     , InvalidationStatus(..)
@@ -59,6 +58,7 @@ import           Text.XML.Cursor      (($/), (&/))
 import qualified Text.XML.Cursor      as X
 -------------------------------------------------------------------------------
 import           Aws.CloudFront.Core
+import           Aws.CloudFront.Util
 -------------------------------------------------------------------------------
 
 
@@ -74,17 +74,6 @@ instance AwsType CreateInvalidationRequestReference where
 
 --TODO: smart constructor nonempty
 --TODO: when do they specify the distribution id
-
--------------------------------------------------------------------------------
---TODO: smart constructor nonempty, leading slash, urlencode
-newtype ObjectPath = ObjectPath {
-      objectPathText :: Text
-    } deriving (Show, Eq, Ord, Monoid, Typeable)
-
-instance AwsType ObjectPath where
-  toText = toTextText . objectPathText
-  parse = ObjectPath <$> parseTextText
-
 
 -------------------------------------------------------------------------------
 data CreateInvalidationRequest = CreateInvalidationRequest {
@@ -136,6 +125,7 @@ instance AsMemoryResponse CreateInvalidationResponse where
 
 instance ResponseConsumer r CreateInvalidationResponse where
   type ResponseMetadata CreateInvalidationResponse = CloudFrontMetadata
+  --TODO: what am I ignoring here?
   responseConsumer _ = cloudFrontXmlResponseConsumer p
     where
       p cursor = do
@@ -146,7 +136,10 @@ instance ResponseConsumer r CreateInvalidationResponse where
       formatError e = "Failed to parse cloudfront response: " <> (T.pack . show) e
       --TODO: probably extract
 
-parseInvalidation :: (Functor m, MonadThrow m) => X.Cursor -> EitherT Text m Invalidation
+parseInvalidation
+    :: (Functor m, MonadThrow m)
+    => X.Cursor
+    -> EitherT Text m Invalidation
 parseInvalidation cursor = do
   cloudFrontCheckResponseType () "Invalidation" cursor
   i <- getContentOf cursor "Id"
@@ -233,15 +226,6 @@ awsTimeFmt = "%Y-%m-%dT%H:%M:%SZ"
 -------------------------------------------------------------------------------
 newtype AWSUTCTime = AWSUTCTime { awsUTCTime :: UTCTime } deriving (ParseTime)
 
-
-toTextText :: (IsString a) => Text -> a
-toTextText = fromString . T.unpack
-
-parseTextText :: (PC.CharParsing f) => f Text
-parseTextText = T.pack <$> parseString
-
-parseString :: (PC.CharParsing f) => f String
-parseString = many PC.anyChar
 
 --TODO: error cases?
 

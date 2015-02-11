@@ -1,6 +1,7 @@
-{-# LANGUAGE CPP                #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE CPP                        #-}
+{-# LANGUAGE DeriveDataTypeable         #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings          #-}
 module Aws.CloudFront.Core where
 
 
@@ -27,11 +28,30 @@ import qualified Text.Parser.Char         as PC
 import qualified Text.XML                 as X
 import           Text.XML.Cursor          hiding (force)
 -------------------------------------------------------------------------------
+import           Aws.CloudFront.Util
+-------------------------------------------------------------------------------
 
 
 newtype DistributionId = DistributionId {
       distributionIdText :: Text
     } deriving (Show, Eq, Ord, Typeable)
+
+
+-------------------------------------------------------------------------------
+newtype Marker = Marker {
+      markerText :: Text
+    } deriving (Show, Eq, Ord, Typeable)
+
+
+-------------------------------------------------------------------------------
+--TODO: smart constructor nonempty, leading slash, urlencode
+newtype ObjectPath = ObjectPath {
+      objectPathText :: Text
+    } deriving (Show, Eq, Ord, Monoid, Typeable)
+
+instance AwsType ObjectPath where
+  toText = toTextText . objectPathText
+  parse = ObjectPath <$> parseTextText
 
 
 -------------------------------------------------------------------------------
@@ -170,6 +190,7 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
         Post -> Just "application/xml"
         Get -> Nothing
         PostQuery -> Just "application/x-www-form-urlencoded; charset=utf-8"
+
         -- The following cases are currently not supported
         Put -> Just "application/xml"
         Delete -> Nothing
@@ -242,3 +263,14 @@ data CloudFrontAction = CreateInvalidation deriving (Show, Eq, Ord, Typeable)
 instance AwsType CloudFrontAction where
   toText CreateInvalidation = "CreateInvalidation"
   parse = PC.text "CreateInvalidation" *> pure CreateInvalidation
+
+
+-------------------------------------------------------------------------------
+--TODO: limit exports, smart constructor
+newtype BucketName = BucketName {
+      bucketNameText :: Text
+    } deriving (Show, Eq, Ord, Typeable)
+
+--TODO: limit to range 1-128
+mkBucketName :: Text -> Maybe BucketName
+mkBucketName = error "TODO: mkBucketName"
