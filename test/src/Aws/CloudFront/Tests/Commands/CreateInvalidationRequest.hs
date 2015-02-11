@@ -19,6 +19,7 @@ import           Text.XML
 import           Text.XML.Cursor
 -------------------------------------------------------------------------------
 import           Aws.CloudFront.Commands.CreateInvalidationRequest
+import           Aws.CloudFront.Core
 import           Aws.CloudFront.TestHelpers
 -------------------------------------------------------------------------------
 

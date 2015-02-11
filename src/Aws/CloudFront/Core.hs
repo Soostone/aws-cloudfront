@@ -17,9 +17,11 @@ import           Data.ByteString          (ByteString)
 import qualified Data.ByteString          as B
 import           Data.Conduit             (($$+-))
 import           Data.IORef
+import           Data.Ix
 import           Data.Maybe
 import           Data.Monoid
 import           Data.Text                (Text, unpack)
+import qualified Data.Text                as T
 import qualified Data.Text.Encoding       as T
 import           Data.Typeable
 import qualified Network.HTTP.Conduit     as HTTP
@@ -273,4 +275,6 @@ newtype BucketName = BucketName {
 
 --TODO: limit to range 1-128
 mkBucketName :: Text -> Maybe BucketName
-mkBucketName = error "TODO: mkBucketName"
+mkBucketName t
+  | inRange (1, 128) (T.length t) = Just $ BucketName t
+  | otherwise                     = Nothing

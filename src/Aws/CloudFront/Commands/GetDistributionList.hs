@@ -49,6 +49,7 @@ module Aws.CloudFront.Commands.GetDistributionList
     , mkHTTPPort
     , OriginAccessIdentity(..)
     , IAMCertificateId(..)
+    , parseDistributionListResponse
     ) where
 
 
@@ -57,6 +58,7 @@ import           Aws.Core
 import           Aws.General
 import           Control.Error
 import           Control.Monad.Catch
+import           Data.Char
 import           Data.Ix
 import           Data.List.NonEmpty  (NonEmpty (..))
 import           Data.Monoid
@@ -67,6 +69,7 @@ import           Data.Typeable
 import qualified Text.XML.Cursor     as X
 -------------------------------------------------------------------------------
 import           Aws.CloudFront.Core
+import           Aws.CloudFront.Util
 -------------------------------------------------------------------------------
 
 
@@ -197,7 +200,16 @@ newtype PathPattern = PathPattern {
 
 --TODO: quickcheck
 mkPathPattern :: Text -> Maybe PathPattern
-mkPathPattern = error "TODO: mkPathPattern"
+mkPathPattern t
+  | whitelistText pathPatternWhitelist (scrub t) = Just $ PathPattern t
+  | otherwise                            = Nothing
+  where
+    scrub = T.replace "&amp;" "&" . T.replace "\\*" "*"
+
+
+pathPatternWhitelist :: String
+pathPatternWhitelist =
+  ['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] ++ "_-.*$/~\"'@:+"
 
 -------------------------------------------------------------------------------
 data AllowedMethodGroup = AMGH
@@ -303,7 +315,12 @@ newtype LoggingPrefix = LoggingPrefix {
 
 
 mkLoggingPrefix :: Text -> Maybe LoggingPrefix
-mkLoggingPrefix = error "TODO: mkLoggingPrefix"
+mkLoggingPrefix t
+  | not (T.null t) && pfx /= "/" && T.length t <= 256 = Just $ LoggingPrefix t
+  | otherwise                                         = Nothing
+  where
+    pfx = T.take 1 t
+
 
 -------------------------------------------------------------------------------
 data GeoRestriction = GeoBlacklist (NonEmpty CountryCode)
@@ -318,9 +335,10 @@ newtype CountryCode = CountryCode {
   } deriving (Show, Eq, Ord, Typeable)
 
 
---TODO: upcase, check length
 mkCountryCode :: Text -> Maybe CountryCode
-mkCountryCode = error "TODO: mkCountryCode"
+mkCountryCode t
+  | T.length t == 2 && T.all isAlpha t = Just $ CountryCode $ T.toUpper t
+  | otherwise                          = Nothing
 
 
 -------------------------------------------------------------------------------
@@ -335,7 +353,7 @@ data PriceClass = PriceClassAll
 
 -------------------------------------------------------------------------------
 data ViewerCertificate = ViewerCertificate { --TODO: iamcid implies ssl support method, MPV is a maybe
-      vcCertificateStrategy         :: ViewerCertificateStrategy
+      vcCertificateStrategy    :: ViewerCertificateStrategy
     , vcMinimumProtocolVersion :: Maybe MinimumProtocolVersion
     } deriving (Show, Eq, Ord, Typeable)
 
