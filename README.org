@@ -3,7 +3,34 @@
   Bindings for AWS CloudFront
 
 * Status
-  Not at all ready for use. Currently no APIs are implemented.
+  Not at all ready for use.
+
+** Supported Cloudfront API Calls
+   - [-] Web Distributions [0/6]
+     - [ ] Create
+     - [-] Index
+     - [ ] Show
+     - [ ] Get Config
+     - [ ] Update Config
+     - [ ] Delete Config
+   - [ ] RTMP Distributions [0/6]
+     - [ ] Create
+     - [ ] Index
+     - [ ] Show
+     - [ ] Get Config
+     - [ ] Update Config
+     - [ ] Delete Config
+   - [ ] Origin Access Identities [0/6]
+     - [ ] Create
+     - [ ] Index
+     - [ ] Show
+     - [ ] Get Config
+     - [ ] Update Config
+     - [ ] Delete Config
+   - [-] Invalidations [0/3]
+     - [ ] Create
+     - [ ] Index
+     - [-] Show
 
 * Tasks
 
@@ -12,3 +39,4 @@
 ** TODO Strictness analysis
 ** TODO Stronger error types
 ** TODO should we share some type instead of deriving our own for ObjectKey?
+** TODO Note usage of S3OriginConfig

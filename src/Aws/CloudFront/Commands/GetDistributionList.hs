@@ -48,6 +48,7 @@ module Aws.CloudFront.Commands.GetDistributionList
     , httpPortNumber
     , mkHTTPPort
     , OriginAccessIdentity(..)
+    , OriginProtocolPolicy(..)
     , IAMCertificateId(..)
     , parseDistributionListResponse
     ) where
@@ -77,7 +78,7 @@ import           Aws.CloudFront.Util
 --TODO: an XSD would make this a lot less ambiguous but all of them seem to have been expunged
 data DistributionSummary = DistributionSummary {
       dsId                   :: DistributionId
-    , dsSummary              :: DistributionSummary
+    , dsStatus               :: DistributionStatus
     , dsLastModifiedTime     :: UTCTime
     , dsDomainName           :: DomainName
     , dsAliases              :: [CName]

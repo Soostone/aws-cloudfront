@@ -8,6 +8,8 @@ import           Control.Applicative
 import           Data.Default
 import           Data.List.NonEmpty    (NonEmpty (..))
 import           Data.String
+import           Data.Time.Calendar
+import           Data.Time.Clock
 import           Filesystem.Path
 import           Prelude               hiding (FilePath)
 import           Test.Tasty.QuickCheck
@@ -70,3 +72,11 @@ instance Arbitrary CloudFrontAction where
 -------------------------------------------------------------------------------
 prop_AWSType_cycle :: (AwsType a, Arbitrary a, Show a, Eq a) => a -> Property
 prop_AWSType_cycle a = fromText (fromString (toText a)) === Right a
+
+
+-------------------------------------------------------------------------------
+mkUTCTime :: Integer -> Int -> Int -> DiffTime -> DiffTime -> DiffTime -> UTCTime
+mkUTCTime yr mt dy hr mn sc = UTCTime d t
+  where
+    d = fromGregorian yr mt dy
+    t = hr * 60 * 60 + mn * 60 + sc

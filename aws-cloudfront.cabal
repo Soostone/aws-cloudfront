@@ -41,6 +41,7 @@ library
                      , time
                      , old-locale
                      , conduit
+                     , containers
 
 
   hs-source-dirs:      src

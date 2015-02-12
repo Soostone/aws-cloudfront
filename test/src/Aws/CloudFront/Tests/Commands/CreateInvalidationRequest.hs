@@ -100,9 +100,5 @@ expectedInvalidation = Invalidation {
     , invPaths           = ObjectPath "/foo/bar.html" :| [ObjectPath "/foo/baz.html"]
     , invCallerReference = CreateInvalidationRequestReference "1234567890"
     , invInvalidationId  =  InvalidationId "123"
-    , invCreateTime      =  UTCTime d t
+    , invCreateTime      = mkUTCTime 2009 11 19 19 37 58
     }
-  where
-    d = fromGregorian 2009 11 19
-    t = 19 * 60 * 60 + 37 * 60 + 58
-
