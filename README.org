@@ -40,3 +40,6 @@
 ** TODO Stronger error types
 ** TODO should we share some type instead of deriving our own for ObjectKey?
 ** TODO Note usage of S3OriginConfig
+* Acknowledgements
+  Much of the design queues for this project were derived by the
+  excellent [[https://github.com/alephcloud/hs-aws-sns][aws-sns]] package by AlephCloud Systems, Inc.
