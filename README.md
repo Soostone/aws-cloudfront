@@ -46,3 +46,8 @@ Not at all ready for use.
 ## TODO should we share some type instead of deriving our own for ObjectKey?
 
 ## TODO Note usage of S3OriginConfig
+
+# Acknowledgements
+
+Much of the design queues for this project were derived by the
+excellent [aws-sns](https://github.com/alephcloud/hs-aws-sns) package by AlephCloud Systems, Inc.
