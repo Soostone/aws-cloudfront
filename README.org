@@ -28,7 +28,7 @@
      - [ ] Update Config
      - [ ] Delete Config
    - [-] Invalidations [0/3]
-     - [ ] Create
+     - [-] Create
      - [ ] Index
      - [-] Show
 
@@ -41,6 +41,10 @@
 ** TODO should we share some type instead of deriving our own for ObjectKey?
 ** TODO Note usage of S3OriginConfig
 ** TODO Use <?> to annotate all parsers
+** TODO Doc header in all modules
+** TODO README examples
+** TODO Move types and parsers into Types module
+** TODO Use fromString . show for toText on sum types
 * Acknowledgements
   Much of the design queues for this project were derived by the
   excellent [[https://github.com/alephcloud/hs-aws-sns][aws-sns]] package by AlephCloud Systems, Inc.

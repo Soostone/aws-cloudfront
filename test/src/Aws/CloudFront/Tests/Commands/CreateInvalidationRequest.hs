@@ -7,11 +7,9 @@ module Aws.CloudFront.Tests.Commands.CreateInvalidationRequest
 
 -------------------------------------------------------------------------------
 import           Control.Error
-import           Data.List.NonEmpty                                (NonEmpty (..))
 import           Data.Text                                         (Text)
 import qualified Data.Text                                         as T
 import           Test.Tasty
-import           Test.Tasty.HUnit
 import           Test.Tasty.QuickCheck
 import           Text.XML
 import           Text.XML.Cursor
@@ -19,13 +17,13 @@ import           Text.XML.Cursor
 import           Aws.CloudFront.Commands.CreateInvalidationRequest
 import           Aws.CloudFront.Core
 import           Aws.CloudFront.TestHelpers
+import           Aws.CloudFront.Types
 -------------------------------------------------------------------------------
 
 
 tests :: TestTree
 tests = testGroup "Aws.CloudFront.Commands.CreateInvalidationRequest"
-  [ parseInvalidationTests
-  , renderCIRTests
+  [ renderCIRTests
   , testProperty "CreateInvalidationRequestReference AWSType" $ \(cirr :: CreateInvalidationRequestReference) ->
     prop_AWSType_cycle cirr
   , testProperty "ObjectPath AWSType" $ \(op :: ObjectPath) ->
@@ -34,15 +32,6 @@ tests = testGroup "Aws.CloudFront.Commands.CreateInvalidationRequest"
     prop_AWSType_cycle is
   , testProperty "InvalidationId AWSType" $ \(ii :: InvalidationId) ->
     prop_AWSType_cycle ii
-  ]
-
-
--------------------------------------------------------------------------------
-parseInvalidationTests :: TestTree
-parseInvalidationTests = testGroup "parseInvalidation"
-  [ testCase "it parses the example xml" $ do
-      res <- runEitherT =<< parseFixture "Invalidation.xml" parseInvalidation
-      res @?= Right expectedInvalidation
   ]
 
 
@@ -89,14 +78,3 @@ pathsQuantity doc = read . T.unpack . fromMaybe "0" . listToMaybe $ c
                     &/ content
   where
     c = fromDocument doc
-
-
--------------------------------------------------------------------------------
-expectedInvalidation :: Invalidation
-expectedInvalidation = Invalidation {
-      invStatus          = InvalidationInProgress
-    , invPaths           = ObjectPath "/foo/bar.html" :| [ObjectPath "/foo/baz.html"]
-    , invCallerReference = CreateInvalidationRequestReference "1234567890"
-    , invInvalidationId  =  InvalidationId "123"
-    , invCreateTime      = mkUTCTime 2009 11 19 19 37 58
-    }

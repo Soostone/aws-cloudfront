@@ -20,6 +20,7 @@ import           Data.IORef
 import           Data.Ix
 import           Data.Maybe
 import           Data.Monoid
+import           Data.String
 import           Data.Text                (Text, unpack)
 import qualified Data.Text                as T
 import qualified Data.Text.Encoding       as T
@@ -162,10 +163,11 @@ instance Exception CloudFrontErrorResponse
 
 -------------------------------------------------------------------------------
 data CloudFrontQuery = CloudFrontQuery {
-      cloudFrontQueryMethod     :: !Method
-    , cloudFrontQueryAction     :: !CloudFrontAction
-    , cloudFrontQueryParameters :: !HTTP.QueryText
-    , cloudFrontQueryBody       :: !(Maybe ByteString)
+      cloudFrontQueryMethod       :: !Method
+    , cloudFrontQueryAction       :: !CloudFrontAction
+    , cloudFrontQueryParameters   :: !HTTP.QueryText
+    , cloudFrontQueryBody         :: !(Maybe ByteString)
+    , cloudFrontQueryPathSegments :: ![Text]
     }
 
 
@@ -194,7 +196,8 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
   where
     -- values that don't depend on the signature
     action = cloudFrontQueryAction query
-    path = []
+    path = apiVersion:(cloudFrontQueryPathSegments query)
+    apiVersion = "2014-11-06"
     host = "cloudfront.amazonaws.com"
     headers = [("host", host)]
     contentType = case cloudFrontQueryMethod query of
@@ -268,12 +271,14 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
 
 
 -------------------------------------------------------------------------------
-data CloudFrontAction = CreateInvalidation deriving (Show, Eq, Ord, Typeable)
+data CloudFrontAction = CreateInvalidation
+                      | GetInvalidation deriving (Show, Eq, Ord, Typeable)
 
 --TODO: but why is this needed? i don't think this hits the cloudfront use case
 instance AwsType CloudFrontAction where
-  toText CreateInvalidation = "CreateInvalidation"
-  parse = PC.text "CreateInvalidation" *> pure CreateInvalidation
+  toText = fromString . show
+  parse = (CreateInvalidation <$ PC.text "CreateInvalidation") <|>
+          (GetInvalidation <$ PC.text "GetInvalidation")
 
 
 -------------------------------------------------------------------------------

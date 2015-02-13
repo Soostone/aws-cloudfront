@@ -20,6 +20,7 @@ Flag Development
 library
   exposed-modules:    Aws.CloudFront
                     , Aws.CloudFront.Core
+                    , Aws.CloudFront.Types
                     , Aws.CloudFront.Commands.CreateInvalidationRequest
                     , Aws.CloudFront.Commands.GetDistributionList
   other-modules:      Aws.CloudFront.Util

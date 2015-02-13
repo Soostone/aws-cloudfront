@@ -30,7 +30,7 @@ Not at all ready for use.
     -   [ ] Update Config
     -   [ ] Delete Config
 -   [-] Invalidations <code>[0/3]</code>
-    -   [ ] Create
+    -   [-] Create
     -   [ ] Index
     -   [-] Show
 
@@ -46,6 +46,16 @@ Not at all ready for use.
 ## TODO should we share some type instead of deriving our own for ObjectKey?
 
 ## TODO Note usage of S3OriginConfig
+
+## TODO Use <?> to annotate all parsers
+
+## TODO Doc header in all modules
+
+## TODO README examples
+
+## TODO Move types and parsers into Types module
+
+## TODO Use fromString . show for toText on sum types
 
 # Acknowledgements
 
