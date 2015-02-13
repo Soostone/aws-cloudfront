@@ -38,11 +38,20 @@ newtype DistributionId = DistributionId {
       distributionIdText :: Text
     } deriving (Show, Eq, Ord, Typeable)
 
+instance AwsType DistributionId where
+  toText = toTextText . distributionIdText
+  parse = DistributionId <$> parseTextText
+
 
 -------------------------------------------------------------------------------
 newtype Marker = Marker {
       markerText :: Text
     } deriving (Show, Eq, Ord, Typeable)
+
+
+instance AwsType Marker where
+  toText = toTextText . markerText
+  parse = Marker <$> parseTextText
 
 
 -------------------------------------------------------------------------------
@@ -278,3 +287,13 @@ mkBucketName :: Text -> Maybe BucketName
 mkBucketName t
   | inRange (1, 128) (T.length t) = Just $ BucketName t
   | otherwise                     = Nothing
+
+
+instance AwsType BucketName where
+  toText = toTextText . bucketNameText
+  parse = BucketName <$> parseTextText
+
+
+-------------------------------------------------------------------------------
+decodeError :: (MonadThrow m) => Text -> m a
+decodeError = throwM . CloudFrontResponseDecodeError

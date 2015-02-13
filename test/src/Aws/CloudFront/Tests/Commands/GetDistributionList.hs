@@ -6,8 +6,8 @@ module Aws.CloudFront.Tests.Commands.GetDistributionList
 
 -------------------------------------------------------------------------------
 import           Control.Error
+import           Data.List.NonEmpty                          (NonEmpty (..))
 import           Data.Maybe
--- import           Data.List.NonEmpty                          (NonEmpty (..))
 import           Test.Tasty
 import           Test.Tasty.HUnit
 -- import           Test.Tasty.QuickCheck
@@ -15,6 +15,7 @@ import           Test.Tasty.HUnit
 import           Aws.CloudFront.Commands.GetDistributionList
 import           Aws.CloudFront.Core
 import           Aws.CloudFront.TestHelpers
+import           Aws.General
 -------------------------------------------------------------------------------
 
 
@@ -36,8 +37,8 @@ parseDistributionListResponseTests = testGroup "parseDistributionListResponse"
 -------------------------------------------------------------------------------
 expectedDistributionListResponse :: GetDistributionListResponse
 expectedDistributionListResponse = GetDistributionListResponse {
-      gdlresCurMarker = Marker "RMPARXS293KSTG7"
-    , gdlresNextMarker = Marker "EMLARXS9EXAMPLE"
+      gdlresCurMarker = Just $ Marker "RMPARXS293KSTG7"
+    , gdlresNextMarker = Just $ Marker "EMLARXS9EXAMPLE"
     , gdlresIsTruncated = True
     , gdlresSummaries = [expectedSummary]
     }
@@ -70,7 +71,7 @@ s3Origin = Origin {
       originId = OriginId "example-Amazon S3-origin"
     , originDomainName = DomainName "myawsbucket.s3.amazonaws.com"
     , originPath = Just $ ObjectPath "/production"
-    , originConfig = Left $ S3OriginConfig "E74FTE3AEXAMPLE"
+    , originConfig = Left $ S3OriginConfig $ OriginAccessIdentity "E74FTE3AEXAMPLE"
     }
 
 
@@ -78,7 +79,7 @@ s3Origin = Origin {
 customOrigin :: Origin
 customOrigin = Origin {
       originId = OriginId "example-custom-origin"
-    , originDomainName = DomainName "exmaple.com"
+    , originDomainName = DomainName "example.com"
     , originPath = Nothing
     , originConfig = Right coc
     }
@@ -86,7 +87,7 @@ customOrigin = Origin {
     coc = fromJust $ do
       httpPort <- mkHTTPPort 80
       httpsPort <- mkHTTPPort 443
-      CustomOriginConfig {
+      return CustomOriginConfig {
             cocHTTPPort             = Just httpPort
           , cocHTTPSPort            = Just httpsPort
           , cocOriginProtocolPolicy = OPPMatchViewer
@@ -95,31 +96,85 @@ customOrigin = Origin {
 
 -------------------------------------------------------------------------------
 defaultCacheBehavior :: UnqualifiedCacheBehavior
-defaultCacheBehavior = undefined
+defaultCacheBehavior = fromJust $ do
+    mtl <- mkMinTTL 0
+    return UnqualifiedCacheBehavior {
+        cbTargetOriginId       = OriginId "example-Amazon S3-origin"
+      , cbForwardedValues      = fvs
+      , cbTrustedSigners       = TrustedSignersEnabled ans
+      , cbViewerProtocolPolicy = VPPRedirectToHTTPS
+      , cbMinTTL               = mtl
+      , cbAllowedMethods       = Just $ AllowedMethods AMGH CMGH
+      , cbSmoothStreaming      = False
+      }
+  where
+    fvs = ForwardedValues {
+            fvQueryString = True
+          , fvCookies = CookieWhitelist $ CookieName "example-cookie" :| []
+          , fvHeaders = [HeaderName "Origin"]
+          }
+    ans = SelfAccountNumber :| [ OtherAccountNumber (AccountId "111122223333")
+                               , OtherAccountNumber (AccountId "444455556666")
+                               ]
 
 
 -------------------------------------------------------------------------------
 cacheBehavior :: CacheBehavior
-cacheBehavior = undefined
+cacheBehavior = fromJust $ do
+    pp <- mkPathPattern "*.jpg"
+    return CacheBehavior {
+      cbPathPattern = pp
+    , cbBehavior = b
+    }
+  where
+    fvs = ForwardedValues {
+            fvQueryString = False
+          , fvCookies = ForwardAllCookies
+          , fvHeaders = [HeaderName "Origin"]
+          }
+    ans =  SelfAccountNumber :| [OtherAccountNumber (AccountId "111122223333")]
+    b = fromJust $ do
+      mtl <- mkMinTTL 86400
+      return UnqualifiedCacheBehavior {
+               cbTargetOriginId       = OriginId "example-custom-origin"
+             , cbForwardedValues      = fvs
+             , cbTrustedSigners       = TrustedSignersEnabled ans
+             , cbViewerProtocolPolicy = VPPAllowAll
+             , cbMinTTL               = mtl
+             , cbAllowedMethods       = Just $ AllowedMethods AMGH CMGH
+             , cbSmoothStreaming      = False
+             }
 
 
 -------------------------------------------------------------------------------
 customErrorResponse :: CustomErrorResponse
-customErrorResponse = undefined
+customErrorResponse = fromJust $ do
+  mtl <- mkMinTTL 30
+  return CustomErrorResponse {
+    cerErrorCode = EC404
+  , cerResponsePagePath = Just $ ObjectPath "/error-pages/404.html"
+  , cerResponseCode = RC200
+  , cerMinTTL = Just mtl
+  }
 
 
 -------------------------------------------------------------------------------
 distributionLogging :: DistributionLogging
 distributionLogging = fromJust $ do
-  return DistributionLog {
-    
+  bn <- mkBucketName "myawslogbucket.s3.amazonaws.com"
+  lp <- mkLoggingPrefix "example.com."
+  return DistributionLogging {
+    dlEnabled        = True
+  , dlIncludeCookies = True
+  , dlBucket         = bn
+  , dlPrefix         = lp
   }
 
 
 -------------------------------------------------------------------------------
 viewerCertificate :: ViewerCertificate
 viewerCertificate = ViewerCertificate {
-      vcCertificateStrategy = UseIAM (IAMCertificateId "AS1A2M3P4L5E67SIIXR3J" VIP)
+      vcCertificateStrategy = UseIAM (IAMCertificateId "AS1A2M3P4L5E67SIIXR3J") VIP
     , vcMinimumProtocolVersion = Just MinTLSv1
     }
 
@@ -129,4 +184,4 @@ geoRestriction :: GeoRestriction
 geoRestriction = fromJust $ do
   aq <- mkCountryCode "AQ"
   cv <- mkCountryCode "CV"
-  return $ GeoWhitelist $ aw :| [cv]
+  return $ GeoWhitelist $ aq :| [cv]

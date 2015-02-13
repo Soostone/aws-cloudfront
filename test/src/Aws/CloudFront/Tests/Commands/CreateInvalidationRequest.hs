@@ -10,8 +10,6 @@ import           Control.Error
 import           Data.List.NonEmpty                                (NonEmpty (..))
 import           Data.Text                                         (Text)
 import qualified Data.Text                                         as T
-import           Data.Time.Calendar
-import           Data.Time.Clock
 import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Test.Tasty.QuickCheck

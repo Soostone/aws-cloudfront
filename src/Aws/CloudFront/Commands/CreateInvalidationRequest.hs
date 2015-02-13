@@ -45,13 +45,11 @@ import qualified Data.ByteString.Lazy as LB
 import           Data.List.NonEmpty   (NonEmpty (..))
 import qualified Data.List.NonEmpty   as NE
 import           Data.Monoid
-import           Data.String
 import           Data.Text            (Text)
 import qualified Data.Text            as T
 import           Data.Time
 import           Data.Traversable
 import           Data.Typeable
-import           System.Locale
 import qualified Text.Parser.Char     as PC
 import           Text.XML
 import           Text.XML.Cursor      (($/), (&/))
@@ -144,14 +142,14 @@ parseInvalidation cursor = do
   cloudFrontCheckResponseType () "Invalidation" cursor
   i <- getContentOf cursor "Id"
   stat <- getContentOf cursor "Status"
-  ct <- awsUTCTime <$> getContentOf cursor "CreateTime"
+  ct <- unAWSUTCTime <$> getContentOf cursor "CreateTime"
   batch <- force "Missing InvalidationBatch" $ cursor
-           $/ X.laxElement "InvalidationBatch"
+           $/ le "InvalidationBatch"
   cref <- getContentOf batch "CallerReference"
   paths <- right $ batch
-           $/ X.laxElement "Paths"
-           &/ X.laxElement "Items"
-           &/ X.laxElement "Path"
+           $/ le "Paths"
+           &/ le "Items" --TODO: extract Items parsing
+           &/ le "Path"
            &/ X.content
   pathsNE <- case paths of
     (x:xs) -> hoistEither (traverse fromText' $ x :| xs)
@@ -163,13 +161,6 @@ parseInvalidation cursor = do
                       , invCreateTime = ct
                       }
 
-getContentOf
-    :: (Functor m, MonadThrow m, AwsType a)
-    => X.Cursor
-    -> Text
-    -> EitherT Text m a
-getContentOf c n = EitherT . fmap fromText' . force ("Missing element " <> T.unpack n) $
-                   c $/ X.laxElement n &/ X.content
 
 
 -------------------------------------------------------------------------------
@@ -210,26 +201,4 @@ instance AwsType InvalidationId where
   parse = InvalidationId <$> parseTextText
 
 
--------------------------------------------------------------------------------
-instance AwsType AWSUTCTime where
-  toText = fromString . formatTime defaultTimeLocale awsTimeFmt . awsUTCTime
-  parse = do
-    s <- parseString
-    maybe (fail "could not parse UTCTime") return $ parseTime defaultTimeLocale awsTimeFmt s
-
-
--------------------------------------------------------------------------------
-awsTimeFmt :: String
-awsTimeFmt = "%Y-%m-%dT%H:%M:%SZ"
-
-
--------------------------------------------------------------------------------
-newtype AWSUTCTime = AWSUTCTime { awsUTCTime :: UTCTime } deriving (ParseTime)
-
-
 --TODO: error cases?
-
-
--------------------------------------------------------------------------------
-fromText' :: (AwsType a) => Text -> Either Text a
-fromText' = fmapL T.pack . fromText
