@@ -101,12 +101,12 @@ instance AwsType AWSUTCTime where
   toText = fromString . formatTime defaultTimeLocale awsTimeFmt . unAWSUTCTime
   parse = do
     s <- parseString
-    maybe (fail "could not parse UTCTime") return $ parseTime defaultTimeLocale awsTimeFmt s
+    maybe (fail $ "could not parse UTCTime string " <> s) return $ parseTime defaultTimeLocale awsTimeFmt s
 
 
 -------------------------------------------------------------------------------
 awsTimeFmt :: String
-awsTimeFmt = "%Y-%m-%dT%H:%M:%SZ"
+awsTimeFmt = "%Y-%m-%dT%H:%M:%S%QZ"
 
 
 -------------------------------------------------------------------------------
