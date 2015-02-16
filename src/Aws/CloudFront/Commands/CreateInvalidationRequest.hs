@@ -30,7 +30,6 @@ module Aws.CloudFront.Commands.CreateInvalidationRequest
 import           Aws.Core
 import           Control.Applicative
 import           Control.Error
-import           Control.Monad.Catch
 import qualified Data.ByteString.Lazy as LB
 import           Data.List.NonEmpty   (NonEmpty (..))
 import qualified Data.List.NonEmpty   as NE
@@ -105,7 +104,7 @@ instance ResponseConsumer r CreateInvalidationResponse where
       p cursor = do
         res <- runEitherT $ parseInvalidation cursor
         case res of
-          Left e -> throwM $ CloudFrontResponseDecodeError $ formatError e
+          Left e -> decodeError $ formatError e
           Right r -> return $ CreateInvalidationResponse r
       formatError e = "Failed to parse cloudfront response: " <> (T.pack . show) e
 

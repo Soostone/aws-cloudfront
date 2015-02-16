@@ -7,7 +7,7 @@ module Aws.CloudFront.Tests.Core
 import           Test.Tasty
 import           Test.Tasty.QuickCheck
 -------------------------------------------------------------------------------
-import           Aws.CloudFront.Core
+import           Aws.CloudFront
 import           Aws.CloudFront.TestHelpers
 -------------------------------------------------------------------------------
 

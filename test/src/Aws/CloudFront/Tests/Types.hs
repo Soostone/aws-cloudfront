@@ -5,12 +5,11 @@ module Aws.CloudFront.Tests.Types
 
 -------------------------------------------------------------------------------
 import           Control.Error
-import           Data.List.NonEmpty           (NonEmpty (..))
+import           Data.List.NonEmpty         (NonEmpty (..))
 import           Test.Tasty
 import           Test.Tasty.HUnit
 -------------------------------------------------------------------------------
-import           Aws.CloudFront.Core
-import           Aws.CloudFront.Types
+import           Aws.CloudFront
 import           Aws.CloudFront.TestHelpers
 -------------------------------------------------------------------------------
 

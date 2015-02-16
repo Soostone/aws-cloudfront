@@ -22,6 +22,7 @@ library
                     , Aws.CloudFront.Core
                     , Aws.CloudFront.Types
                     , Aws.CloudFront.Commands.CreateInvalidationRequest
+                    , Aws.CloudFront.Commands.GetDistribution
                     , Aws.CloudFront.Commands.GetDistributionList
                     , Aws.CloudFront.Commands.GetInvalidationList
                     , Aws.CloudFront.Util

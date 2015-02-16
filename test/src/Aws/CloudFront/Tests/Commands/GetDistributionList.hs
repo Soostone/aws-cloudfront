@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Aws.CloudFront.Tests.Commands.GetDistributionList
     ( tests
@@ -6,17 +6,16 @@ module Aws.CloudFront.Tests.Commands.GetDistributionList
 
 
 -------------------------------------------------------------------------------
+import           Aws.General
 import           Control.Error
-import           Data.List.NonEmpty                          (NonEmpty (..))
+import           Data.List.NonEmpty         (NonEmpty (..))
 import           Data.Maybe
 import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Test.Tasty.QuickCheck
 -------------------------------------------------------------------------------
-import           Aws.CloudFront.Commands.GetDistributionList
-import           Aws.CloudFront.Core
+import           Aws.CloudFront
 import           Aws.CloudFront.TestHelpers
-import           Aws.General
 -------------------------------------------------------------------------------
 
 

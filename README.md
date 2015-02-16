@@ -8,10 +8,10 @@ Not at all ready for use.
 
 ## Supported Cloudfront API Calls
 
--   [-] Web Distributions <code>[1/6]</code>
+-   [-] Web Distributions <code>[2/6]</code>
     -   [ ] Create
     -   [X] Index
-    -   [ ] Show
+    -   [X] Show
     -   [ ] Get Config
     -   [ ] Update Config
     -   [ ] Delete Config
@@ -56,6 +56,10 @@ Not at all ready for use.
 ## TODO Move types and parsers into Types module
 
 ## TODO Use fromString . show for toText on sum types
+
+## TODO Break out parseDistributionSummary
+
+## TODO reorg test modules
 
 # Acknowledgements
 

@@ -6,10 +6,10 @@
   Not at all ready for use.
 
 ** Supported Cloudfront API Calls
-   - [-] Web Distributions [1/6]
+   - [-] Web Distributions [2/6]
      - [ ] Create
      - [X] Index
-     - [ ] Show
+     - [X] Show
      - [ ] Get Config
      - [ ] Update Config
      - [ ] Delete Config
@@ -45,6 +45,8 @@
 ** TODO README examples
 ** TODO Move types and parsers into Types module
 ** TODO Use fromString . show for toText on sum types
+** TODO Break out parseDistributionSummary
+** TODO reorg test modules
 * Acknowledgements
   Much of the design queues for this project were derived by the
   excellent [[https://github.com/alephcloud/hs-aws-sns][aws-sns]] package by AlephCloud Systems, Inc.

@@ -5,6 +5,7 @@ module Aws.CloudFront
 
 -------------------------------------------------------------------------------
 import           Aws.CloudFront.Commands.CreateInvalidationRequest as X
+import           Aws.CloudFront.Commands.GetDistribution           as X
 import           Aws.CloudFront.Commands.GetDistributionList       as X
 import           Aws.CloudFront.Commands.GetInvalidationList       as X
 import           Aws.CloudFront.Commands.GetInvalidationRequest    as X

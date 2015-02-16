@@ -9,10 +9,8 @@ import           Control.Error
 import           Test.Tasty
 import           Test.Tasty.HUnit
 -------------------------------------------------------------------------------
-import           Aws.CloudFront.Commands.GetInvalidationList
-import           Aws.CloudFront.Core
+import           Aws.CloudFront
 import           Aws.CloudFront.TestHelpers
-import           Aws.CloudFront.Types
 -------------------------------------------------------------------------------
 
 

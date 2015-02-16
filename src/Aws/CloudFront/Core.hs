@@ -17,12 +17,10 @@ import           Data.ByteString          (ByteString)
 import qualified Data.ByteString          as B
 import           Data.Conduit             (($$+-))
 import           Data.IORef
-import           Data.Ix
 import           Data.Maybe
 import           Data.Monoid
 import           Data.String
-import           Data.Text                (Text, unpack)
-import qualified Data.Text                as T
+import           Data.Text                (Text)
 import qualified Data.Text.Encoding       as T
 import           Data.Typeable
 import qualified Network.HTTP.Conduit     as HTTP
@@ -31,39 +29,8 @@ import qualified Text.Parser.Char         as PC
 import qualified Text.XML                 as X
 import           Text.XML.Cursor          hiding (force)
 -------------------------------------------------------------------------------
-import           Aws.CloudFront.Util
+import           Aws.CloudFront.Types
 -------------------------------------------------------------------------------
-
-
-newtype DistributionId = DistributionId {
-      distributionIdText :: Text
-    } deriving (Show, Eq, Ord, Typeable)
-
-instance AwsType DistributionId where
-  toText = toTextText . distributionIdText
-  parse = DistributionId <$> parseTextText
-
-
--------------------------------------------------------------------------------
-newtype Marker = Marker {
-      markerText :: Text
-    } deriving (Show, Eq, Ord, Typeable)
-
-
-instance AwsType Marker where
-  toText = toTextText . markerText
-  parse = Marker <$> parseTextText
-
-
--------------------------------------------------------------------------------
---TODO: smart constructor nonempty, leading slash, urlencode
-newtype ObjectPath = ObjectPath {
-      objectPathText :: Text
-    } deriving (Show, Eq, Ord, Monoid, Typeable)
-
-instance AwsType ObjectPath where
-  toText = toTextText . objectPathText
-  parse = ObjectPath <$> parseTextText
 
 
 -------------------------------------------------------------------------------
@@ -135,30 +102,6 @@ cloudFrontErrorResponseConsumer resp = do
         <*> (pure $ do
             unprocessed <- listToMaybe $ root $// elCont "StringToSignBytes"
             B.pack <$> mapM readHex2 (words unprocessed))
-
-
--------------------------------------------------------------------------------
-cloudFrontCheckResponseType :: (MonadThrow m) => a -> Text -> Cursor -> m a
-cloudFrontCheckResponseType a n c = do
-  _ <- force ("Expected response type " ++ unpack n) (laxElement n c)
-  return a
-
-
--------------------------------------------------------------------------------
-data CloudFrontErrorResponse
-    = CloudFrontErrorResponse
-        { cloudFrontErrorStatusCode   :: !HTTP.Status
-        , cloudFrontErrorCode         :: !Text
-        , cloudFrontErrorMessage      :: !Text
-        , cloudFrontErrorResource     :: !(Maybe Text)
-        , cloudFrontErrorHostId       :: !(Maybe Text)
-        , cloudFrontErrorAccessKeyId  :: !(Maybe Text)
-        , cloudFrontErrorStringToSign :: !(Maybe ByteString)
-        }
-    | CloudFrontResponseDecodeError Text
-    deriving (Show, Eq, Ord, Typeable)
-
-instance Exception CloudFrontErrorResponse
 
 
 -------------------------------------------------------------------------------
@@ -274,36 +217,16 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
 data CloudFrontAction = CreateInvalidation
                       | GetInvalidation
                       | GetInvalidationList
+                      | GetDistribution
                       | GetDistributionList
                       deriving (Show, Eq, Ord, Typeable)
 
 --TODO: but why is this needed? i don't think this hits the cloudfront use case
+--TODO: having an EOS would prevent us from having to shift precedence so much
 instance AwsType CloudFrontAction where
   toText = fromString . show
   parse = (CreateInvalidation <$ PC.text "CreateInvalidation") <|>
           (GetInvalidationList <$ PC.text "GetInvalidationList") <|>
           (GetInvalidation <$ PC.text "GetInvalidation") <|>
-          (GetDistributionList <$ PC.text "GetDistributionList")
-
-
--------------------------------------------------------------------------------
---TODO: limit exports, smart constructor
-newtype BucketName = BucketName {
-      bucketNameText :: Text
-    } deriving (Show, Eq, Ord, Typeable)
-
---TODO: limit to range 1-128
-mkBucketName :: Text -> Maybe BucketName
-mkBucketName t
-  | inRange (1, 128) (T.length t) = Just $ BucketName t
-  | otherwise                     = Nothing
-
-
-instance AwsType BucketName where
-  toText = toTextText . bucketNameText
-  parse = BucketName <$> parseTextText
-
-
--------------------------------------------------------------------------------
-decodeError :: (MonadThrow m) => Text -> m a
-decodeError = throwM . CloudFrontResponseDecodeError
+          (GetDistributionList <$ PC.text "GetDistributionList") <|>
+          (GetDistribution <$ PC.text "GetDistribution")

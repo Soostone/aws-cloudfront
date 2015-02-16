@@ -14,10 +14,8 @@ import           Test.Tasty.QuickCheck
 import           Text.XML
 import           Text.XML.Cursor
 -------------------------------------------------------------------------------
-import           Aws.CloudFront.Commands.CreateInvalidationRequest
-import           Aws.CloudFront.Core
+import           Aws.CloudFront
 import           Aws.CloudFront.TestHelpers
-import           Aws.CloudFront.Types
 -------------------------------------------------------------------------------
 
 

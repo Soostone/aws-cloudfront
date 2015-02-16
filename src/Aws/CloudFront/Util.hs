@@ -127,3 +127,17 @@ instance AwsType AWSBool where
 ftMaybe :: (Monad m, AwsType a) => [Text] -> EitherT Text m (Maybe a)
 ftMaybe [] = return Nothing
 ftMaybe (x:_) = hoistEither (Just <$> fromText' x)
+
+
+-------------------------------------------------------------------------------
+--TODO: make sure this is used everywhere it needs to be, extract to Util
+ftList
+    :: (MonadThrow m, AwsType a)
+    => X.Cursor
+    -> Text
+    -> EitherT Text m [a]
+ftList cursor n =
+  hoistEither . mapM fromText' $ cursor
+    $/ le "Items"
+    &/ le n
+    &/ X.content
