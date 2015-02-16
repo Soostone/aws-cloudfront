@@ -23,8 +23,8 @@ library
                     , Aws.CloudFront.Types
                     , Aws.CloudFront.Commands.CreateInvalidationRequest
                     , Aws.CloudFront.Commands.GetDistributionList
-  other-modules:      Aws.CloudFront.Util
-  build-depends:       base >= 4.6 && < 4.7
+                    , Aws.CloudFront.Util
+  build-depends:       base >= 4.6 && < 5
                      , aws  >= 0.10  && < 0.12
                      , aws-general
                      , http-types
@@ -73,3 +73,5 @@ test-suite test
                  , errors
                  , text
                  , aws-general
+                 , quickcheck-instances
+                 , derive

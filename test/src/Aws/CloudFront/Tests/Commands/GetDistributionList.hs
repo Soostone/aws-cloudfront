@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Aws.CloudFront.Tests.Commands.GetDistributionList
     ( tests
     ) where
@@ -10,7 +11,7 @@ import           Data.List.NonEmpty                          (NonEmpty (..))
 import           Data.Maybe
 import           Test.Tasty
 import           Test.Tasty.HUnit
--- import           Test.Tasty.QuickCheck
+import           Test.Tasty.QuickCheck
 -------------------------------------------------------------------------------
 import           Aws.CloudFront.Commands.GetDistributionList
 import           Aws.CloudFront.Core
@@ -31,6 +32,48 @@ parseDistributionListResponseTests = testGroup "parseDistributionListResponse"
   [ testCase "it parses the example xml" $ do
       res <- runEitherT =<< parseFixture "ListDistributions.xml" parseDistributionListResponse
       res @?= Right expectedDistributionListResponse
+  , testProperty "AwsType DistributionStatus" $ \(x :: DistributionStatus) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType DomainName" $ \(x :: DomainName) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType PathPattern" $ \(x :: PathPattern) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType HeaderName" $ \(x :: HeaderName) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType CookieName" $ \(x :: CookieName) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType AccountNumber" $ \(x :: AccountNumber) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType ViewerProtocolPolicy" $ \(x :: ViewerProtocolPolicy) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType MinTTL" $ \(x :: MinTTL) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType LoggingPrefix" $ \(x :: LoggingPrefix) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType CountryCode" $ \(x :: CountryCode) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType PriceClass" $ \(x :: PriceClass) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType IAMCertificateId" $ \(x :: IAMCertificateId) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType SSLSupportMethod" $ \(x :: SSLSupportMethod) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType MinimumProtocolVersion" $ \(x :: MinimumProtocolVersion) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType OriginId" $ \(x :: OriginId) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType ResponseCode" $ \(x :: ResponseCode) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType ErrorCode" $ \(x :: ErrorCode) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType S3OriginConfig" $ \(x :: S3OriginConfig) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType OriginAccessIdentity" $ \(x :: OriginAccessIdentity) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType OriginProtocolPolicy" $ \(x :: OriginProtocolPolicy) ->
+     prop_AWSType_cycle x
+  , testProperty "AwsType HTTPPort" $ \(x :: HTTPPort) ->
+     prop_AWSType_cycle x
   ]
 
 

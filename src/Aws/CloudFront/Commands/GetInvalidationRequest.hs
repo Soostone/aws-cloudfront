@@ -60,7 +60,7 @@ instance AsMemoryResponse GetInvalidationResponse where
 
 instance ResponseConsumer r GetInvalidationResponse where
   type ResponseMetadata GetInvalidationResponse = CloudFrontMetadata
-  responseConsumer _ = cloudFrontXmlResponseConsumer p --TODO: NOPE
+  responseConsumer _ = cloudFrontXmlResponseConsumer p
     where
       p cursor = do
         res <- runEitherT $ parseInvalidation cursor

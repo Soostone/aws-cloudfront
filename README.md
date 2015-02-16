@@ -29,8 +29,8 @@ Not at all ready for use.
     -   [ ] Get Config
     -   [ ] Update Config
     -   [ ] Delete Config
--   [-] Invalidations <code>[0/3]</code>
-    -   [-] Create
+-   [-] Invalidations <code>[1/3]</code>
+    -   [X] Create
     -   [ ] Index
     -   [-] Show
 

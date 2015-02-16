@@ -27,8 +27,8 @@
      - [ ] Get Config
      - [ ] Update Config
      - [ ] Delete Config
-   - [-] Invalidations [0/3]
-     - [-] Create
+   - [-] Invalidations [1/3]
+     - [X] Create
      - [ ] Index
      - [-] Show
 

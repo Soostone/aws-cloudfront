@@ -272,13 +272,16 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
 
 -------------------------------------------------------------------------------
 data CloudFrontAction = CreateInvalidation
-                      | GetInvalidation deriving (Show, Eq, Ord, Typeable)
+                      | GetInvalidation
+                      | GetDistributionList
+                      deriving (Show, Eq, Ord, Typeable)
 
 --TODO: but why is this needed? i don't think this hits the cloudfront use case
 instance AwsType CloudFrontAction where
   toText = fromString . show
   parse = (CreateInvalidation <$ PC.text "CreateInvalidation") <|>
-          (GetInvalidation <$ PC.text "GetInvalidation")
+          (GetInvalidation <$ PC.text "GetInvalidation") <|>
+          (GetDistributionList <$ PC.text "GetDistributionList")
 
 
 -------------------------------------------------------------------------------

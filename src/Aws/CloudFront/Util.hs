@@ -93,7 +93,7 @@ le = X.laxElement
 -------------------------------------------------------------------------------
 newtype AWSUTCTime = AWSUTCTime {
       unAWSUTCTime :: UTCTime
-    } deriving (ParseTime)
+    } deriving (ParseTime, Show, Eq)
 
 
 -------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ awsTimeFmt = "%Y-%m-%dT%H:%M:%S%QZ"
 -------------------------------------------------------------------------------
 newtype AWSBool = AWSBool {
       unAWSBool :: Bool
-    }
+    } deriving (Show, Eq)
 
 
 instance AwsType AWSBool where

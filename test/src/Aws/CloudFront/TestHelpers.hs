@@ -1,4 +1,7 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE StandaloneDeriving         #-}
+{-# LANGUAGE TemplateHaskell            #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Aws.CloudFront.TestHelpers where
 
@@ -6,8 +9,12 @@ module Aws.CloudFront.TestHelpers where
 import           Aws.General
 import           Control.Applicative
 import           Data.Default
+import           Data.Derive.Arbitrary
+import           Data.DeriveTH
 import           Data.List.NonEmpty    (NonEmpty (..))
+import           Data.Maybe
 import           Data.String
+import qualified Data.Text             as T
 import           Data.Time.Calendar
 import           Data.Time.Clock
 import           Filesystem.Path
@@ -17,9 +24,15 @@ import qualified Text.XML              as X
 import qualified Text.XML.Cursor       as X
 -------------------------------------------------------------------------------
 import           Aws.CloudFront
+import           Aws.CloudFront.Util
 -------------------------------------------------------------------------------
 
 
+(<||>) :: (Applicative f) => f Bool -> f Bool -> f Bool
+(<||>) = liftA2 (||)
+
+
+-------------------------------------------------------------------------------
 parseFixture :: FilePath -> (X.Cursor -> a) -> IO a
 parseFixture fp f = do
   doc <- X.readFile def $ fixturePath fp
@@ -31,42 +44,74 @@ fixturePath :: FilePath -> FilePath
 fixturePath fp = "test" </> "fixtures" </> fp
 
 
-instance Arbitrary ObjectPath where
-  arbitrary = ObjectPath <$> arbitrary
-
-
-instance Arbitrary CreateInvalidationRequestReference where
-  arbitrary = CreateInvalidationRequestReference <$> arbitrary
-
-
-instance Arbitrary DistributionId where
-  arbitrary = DistributionId <$> arbitrary
-
-
-instance Arbitrary InvalidationId where
-  arbitrary = InvalidationId <$> arbitrary
-
-
 instance Arbitrary a => Arbitrary (NonEmpty a) where
   arbitrary = (:|) <$> arbitrary <*> arbitrary
 
 
-instance Arbitrary CreateInvalidationRequest where
-  arbitrary = CreateInvalidationRequest
-              <$> arbitrary
-              <*> arbitrary
-              <*> arbitrary
+instance Arbitrary HTTPPort where
+  arbitrary = fromJust . mkHTTPPort <$> go
+    where
+      go = arbitrary `suchThat` (isJust . mkHTTPPort)
 
 
-instance Arbitrary InvalidationStatus where
-  arbitrary = oneof [ pure InvalidationInProgress
-                    , pure InvalidationCompleted
-                    ]
+instance Arbitrary CountryCode where
+  arbitrary = do
+    a <- choose ('A','Z')
+    b <- choose ('A','Z')
+    return $ fromJust $ mkCountryCode $ T.pack [a,b]
 
 
-instance Arbitrary CloudFrontAction where
-  arbitrary = oneof [ pure CreateInvalidation
-                    ]
+instance Arbitrary MinTTL where
+  arbitrary = fromJust . mkMinTTL <$> go
+    where
+      go = arbitrary `suchThat` (isJust . mkMinTTL)
+
+
+--TODO: rewrite others in this style?
+instance Arbitrary LoggingPrefix where
+  arbitrary = fromJust . mkLoggingPrefix <$> go
+    where
+      go = arbitrary `suchThat` (isJust . mkLoggingPrefix)
+
+
+instance Arbitrary PathPattern  where
+  arbitrary = fromJust . mkPathPattern <$> go
+    where
+      go = arbitrary `suchThat` (isJust . mkPathPattern)
+
+
+instance Arbitrary BucketName  where
+  arbitrary = fromJust . mkBucketName <$> go
+    where
+      go = arbitrary `suchThat` (isJust . mkBucketName)
+
+
+$(derive makeArbitrary ''Marker)
+$(derive makeArbitrary ''S3OriginConfig)
+$(derive makeArbitrary ''OriginAccessIdentity)
+$(derive makeArbitrary ''CreateInvalidationRequest)
+$(derive makeArbitrary ''OriginProtocolPolicy)
+$(derive makeArbitrary ''ObjectPath)
+$(derive makeArbitrary ''CreateInvalidationRequestReference)
+$(derive makeArbitrary ''DistributionId)
+$(derive makeArbitrary ''InvalidationId)
+$(derive makeArbitrary ''InvalidationStatus)
+$(derive makeArbitrary ''CloudFrontAction)
+$(derive makeArbitrary ''AWSUTCTime)
+$(derive makeArbitrary ''AWSBool)
+$(derive makeArbitrary ''ErrorCode)
+$(derive makeArbitrary ''ResponseCode)
+$(derive makeArbitrary ''MinimumProtocolVersion)
+$(derive makeArbitrary ''SSLSupportMethod)
+$(derive makeArbitrary ''IAMCertificateId)
+$(derive makeArbitrary ''PriceClass)
+$(derive makeArbitrary ''OriginId)
+$(derive makeArbitrary ''ViewerProtocolPolicy)
+$(derive makeArbitrary ''CookieName)
+$(derive makeArbitrary ''HeaderName)
+$(derive makeArbitrary ''DomainName)
+$(derive makeArbitrary ''DistributionStatus)
+$(derive makeArbitrary ''AccountNumber)
 
 
 -------------------------------------------------------------------------------

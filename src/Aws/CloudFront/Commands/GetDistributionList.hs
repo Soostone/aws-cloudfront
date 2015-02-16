@@ -113,7 +113,13 @@ data GetDistributionListRequest = GetDistributionListRequest {
 
 instance SignQuery GetDistributionListRequest where
   type ServiceConfiguration GetDistributionListRequest = CloudFrontConfiguration
-  signQuery _gdlr@GetDistributionListRequest {..} = undefined
+  signQuery _gdlr@GetDistributionListRequest {..} = cloudFrontSignQuery CloudFrontQuery {
+        cloudFrontQueryMethod = Get
+      , cloudFrontQueryAction = GetDistributionList
+      , cloudFrontQueryParameters = mempty
+      , cloudFrontQueryBody = Nothing
+      , cloudFrontQueryPathSegments = [ "distribution" ]
+      }
 
 
 instance Transaction GetDistributionListRequest GetDistributionListResponse
@@ -961,7 +967,7 @@ newtype S3OriginConfig = S3OriginConfig {
 
 
 instance AwsType S3OriginConfig where
-  toText = toText . s3OriginAccessIdentity
+  toText (S3OriginConfig oic) = "origin-access-identity/cloudfront/" <> toText oic
   parse = PC.text "origin-access-identity/cloudfront/" *>
           (S3OriginConfig <$> parse)
 
