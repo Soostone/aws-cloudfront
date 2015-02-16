@@ -132,9 +132,11 @@ data GetDistributionListResponse = GetDistributionListResponse {
     , gdlresSummaries   :: [DistributionSummary]
     } deriving (Show, Eq, Ord, Typeable)
 
+
 instance AsMemoryResponse GetDistributionListResponse where
   type MemoryResponse GetDistributionListResponse = GetDistributionListResponse
   loadToMemory = return
+
 
 --TODO: extract this implemention to Core, parameterized on parser
 instance ResponseConsumer r GetDistributionListResponse where

@@ -8,9 +8,9 @@ Not at all ready for use.
 
 ## Supported Cloudfront API Calls
 
--   [-] Web Distributions <code>[0/6]</code>
+-   [-] Web Distributions <code>[1/6]</code>
     -   [ ] Create
-    -   [-] Index
+    -   [X] Index
     -   [ ] Show
     -   [ ] Get Config
     -   [ ] Update Config
@@ -29,10 +29,10 @@ Not at all ready for use.
     -   [ ] Get Config
     -   [ ] Update Config
     -   [ ] Delete Config
--   [-] Invalidations <code>[1/3]</code>
+-   [X] Invalidations <code>[3/3]</code>
     -   [X] Create
-    -   [ ] Index
-    -   [-] Show
+    -   [X] Index
+    -   [X] Show
 
 # Tasks
 

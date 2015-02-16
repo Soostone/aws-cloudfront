@@ -273,6 +273,7 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
 -------------------------------------------------------------------------------
 data CloudFrontAction = CreateInvalidation
                       | GetInvalidation
+                      | GetInvalidationList
                       | GetDistributionList
                       deriving (Show, Eq, Ord, Typeable)
 
@@ -280,6 +281,7 @@ data CloudFrontAction = CreateInvalidation
 instance AwsType CloudFrontAction where
   toText = fromString . show
   parse = (CreateInvalidation <$ PC.text "CreateInvalidation") <|>
+          (GetInvalidationList <$ PC.text "GetInvalidationList") <|>
           (GetInvalidation <$ PC.text "GetInvalidation") <|>
           (GetDistributionList <$ PC.text "GetDistributionList")
 
