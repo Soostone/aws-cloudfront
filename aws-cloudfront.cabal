@@ -25,6 +25,7 @@ library
                     , Aws.CloudFront.Commands.GetDistribution
                     , Aws.CloudFront.Commands.GetDistributionList
                     , Aws.CloudFront.Commands.GetInvalidationList
+                    , Aws.CloudFront.Commands.GetInvalidationRequest
                     , Aws.CloudFront.Util
   build-depends:       base >= 4.6 && < 5
                      , aws  >= 0.10  && < 0.12
