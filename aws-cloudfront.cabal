@@ -28,7 +28,7 @@ library
                     , Aws.CloudFront.Util
   build-depends:       base >= 4.6 && < 5
                      , aws  >= 0.10  && < 0.12
-                     , aws-general
+                     , aws-general >= 0.2
                      , http-types
                      , semigroups
                      , xml-conduit >= 1.2 && < 1.3
