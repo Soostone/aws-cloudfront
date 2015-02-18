@@ -1,5 +1,7 @@
 # aws-cloudfront
 
+[![img](//travis-ci.org/Soostone/aws-cloudfront.svg)](https://travis-ci.org/Soostone/aws-cloudfront)
+
 Bindings for AWS CloudFront
 
 # Status

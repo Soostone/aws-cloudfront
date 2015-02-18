@@ -1,4 +1,5 @@
 * aws-cloudfront
+  [[https://travis-ci.org/Soostone/aws-cloudfront][https://travis-ci.org/Soostone/aws-cloudfront.svg]]
 
   Bindings for AWS CloudFront
 
