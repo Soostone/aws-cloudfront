@@ -39,7 +39,7 @@ Not at all ready for use.
 
 ## TODO Travis CI setup
 
-## TODO Strictness analysis
+## DONE Strictness analysis
 
 ## TODO Stronger error types
 
@@ -62,6 +62,12 @@ Not at all ready for use.
 ## TODO reorg test modules
 
 ## TODO Be consistent about fields that are an ID, i.e. invInvalidationId -> invId
+
+## TODO Not emitting request id or x-amz-id-2
+
+## TODO Probably drop "Request" suffix from commands. unnecessary
+
+## TODO Ensure not sending superfluous headers
 
 # Acknowledgements
 

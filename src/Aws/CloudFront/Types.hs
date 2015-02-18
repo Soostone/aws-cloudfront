@@ -211,11 +211,11 @@ instance AwsType CreateInvalidationRequestReference where
 
 -------------------------------------------------------------------------------
 data Invalidation = Invalidation {
-      invStatus          :: InvalidationStatus
-    , invPaths           :: NonEmpty ObjectPath
-    , invCallerReference :: CreateInvalidationRequestReference
-    , invInvalidationId  :: InvalidationId
-    , invCreateTime      :: UTCTime
+      invStatus          :: !InvalidationStatus
+    , invPaths           :: !(NonEmpty ObjectPath)
+    , invCallerReference :: !CreateInvalidationRequestReference
+    , invInvalidationId  :: !InvalidationId
+    , invCreateTime      :: !UTCTime
     } deriving (Show, Eq, Ord, Typeable)
 
 
@@ -289,21 +289,21 @@ cloudFrontCheckResponseType a n c = do
 --TODO: i think some of this is actually DistributionConfig
 --TODO: an XSD would make this a lot less ambiguous but all of them seem to have been expunged
 data DistributionSummary = DistributionSummary {
-      dsId                   :: DistributionId
-    , dsStatus               :: DistributionStatus
-    , dsLastModifiedTime     :: UTCTime
-    , dsDomainName           :: DomainName
-    , dsAliases              :: [CName]
-    , dsOrigins              :: [Origin]
-    , dsDefaultCacheBehavior :: UnqualifiedCacheBehavior
-    , dsCacheBehaviors       :: [CacheBehavior] -- TODO: nonempty?
-    , dsCustomErrorResponses :: [CustomErrorResponse]
-    , dsRestrictions         :: Maybe GeoRestriction
-    , dsComment              :: Maybe Text -- blank means Nothing
-    , dsLogging              :: Maybe DistributionLogging
-    , dsViewerCertificate    :: ViewerCertificate
-    , dsPriceClass           :: PriceClass -- is this used elsewhere?
-    , dsEnabled              :: Bool
+      dsId                   :: !DistributionId
+    , dsStatus               :: !DistributionStatus
+    , dsLastModifiedTime     :: !UTCTime
+    , dsDomainName           :: !DomainName
+    , dsAliases              :: ![CName]
+    , dsOrigins              :: ![Origin]
+    , dsDefaultCacheBehavior :: !UnqualifiedCacheBehavior
+    , dsCacheBehaviors       :: ![CacheBehavior] -- TODO: nonempty?
+    , dsCustomErrorResponses :: ![CustomErrorResponse]
+    , dsRestrictions         :: !(Maybe GeoRestriction)
+    , dsComment              :: !(Maybe Text) -- blank means Nothing
+    , dsLogging              :: !(Maybe DistributionLogging)
+    , dsViewerCertificate    :: !ViewerCertificate
+    , dsPriceClass           :: !PriceClass -- is this used elsewhere?
+    , dsEnabled              :: !Bool
     } deriving (Show, Eq, Ord, Typeable)
 
 
@@ -338,10 +338,10 @@ newtype CName = CName {
 
 -------------------------------------------------------------------------------
 data Origin = Origin {
-      originId         :: OriginId
-    , originDomainName :: DomainName
-    , originPath       :: Maybe ObjectPath -- TODO: verify
-    , originConfig     :: Either S3OriginConfig CustomOriginConfig
+      originId         :: !OriginId
+    , originDomainName :: !DomainName
+    , originPath       :: !(Maybe ObjectPath) -- TODO: verify
+    , originConfig     :: !(Either S3OriginConfig CustomOriginConfig)
     } deriving (Show, Eq, Ord, Typeable)
 
 -------------------------------------------------------------------------------
@@ -358,8 +358,8 @@ data UnqualifiedCacheBehavior = UnqualifiedCacheBehavior {
 
 -------------------------------------------------------------------------------
 data CacheBehavior = CacheBehavior {
-      cbPathPattern :: PathPattern
-    , cbBehavior    :: UnqualifiedCacheBehavior
+      cbPathPattern :: !PathPattern
+    , cbBehavior    :: !UnqualifiedCacheBehavior
     } deriving (Show, Eq, Ord, Typeable)
 
 
@@ -396,8 +396,8 @@ instance AwsType PathPattern where
 
 -------------------------------------------------------------------------------
 data AllowedMethods = AllowedMethods {
-      amsAllowedGroup :: AllowedMethodGroup
-    , amsCachedGroup  :: CachedMethodGroup
+      amsAllowedGroup :: !AllowedMethodGroup
+    , amsCachedGroup  :: !CachedMethodGroup
     } deriving (Show, Eq, Ord, Typeable)
 
 
@@ -421,9 +421,9 @@ data CachedMethodGroup = CMGH
 
 -------------------------------------------------------------------------------
 data ForwardedValues = ForwardedValues {
-      fvQueryString :: Bool
-    , fvCookies     :: CookieForwarding
-    , fvHeaders     :: [HeaderName]
+      fvQueryString :: !Bool
+    , fvCookies     :: !CookieForwarding
+    , fvHeaders     :: ![HeaderName]
     } deriving (Show, Eq, Ord, Typeable)
 
 
@@ -441,7 +441,7 @@ instance AwsType HeaderName where
 -------------------------------------------------------------------------------
 data CookieForwarding = ForwardAllCookies
                       | ForwardNoCookies
-                      | CookieWhitelist (NonEmpty CookieName)
+                      | CookieWhitelist !(NonEmpty CookieName)
                       deriving (Show, Eq, Ord, Typeable)
 
 
@@ -464,7 +464,7 @@ data TrustedSignersSettings = TrustedSignersEnabled (NonEmpty AccountNumber) -- 
 
 -------------------------------------------------------------------------------
 data AccountNumber = SelfAccountNumber
-                   | OtherAccountNumber AccountId
+                   | OtherAccountNumber !AccountId
                    deriving (Show, Eq, Ord, Typeable)
 
 
@@ -527,10 +527,10 @@ instance AwsType MinTTL where
 
 -------------------------------------------------------------------------------
 data DistributionLogging = DistributionLogging {
-      dlEnabled        :: Bool --TODO: do other fields appear if disabled?
-    , dlIncludeCookies :: Bool
-    , dlBucket         :: BucketName
-    , dlPrefix         :: LoggingPrefix
+      dlEnabled        :: !Bool --TODO: do other fields appear if disabled?
+    , dlIncludeCookies :: !Bool
+    , dlBucket         :: !BucketName
+    , dlPrefix         :: !LoggingPrefix
     } deriving (Show, Eq, Ord, Typeable)
 
 
@@ -556,7 +556,7 @@ instance AwsType LoggingPrefix where
 
 -------------------------------------------------------------------------------
 data GeoRestriction = GeoAllowAll -- is GeoRestriction really optional or is omission GeoAllowAll
-                    | GeoWhitelist (NonEmpty CountryCode)
+                    | GeoWhitelist !(NonEmpty CountryCode)
                     | GeoAllowNone
                     deriving (Show, Eq, Ord, Typeable) --TODO
 
@@ -599,13 +599,13 @@ instance AwsType PriceClass where
 
 -------------------------------------------------------------------------------
 data ViewerCertificate = ViewerCertificate { --TODO: iamcid implies ssl support method, MPV is a maybe
-      vcCertificateStrategy    :: ViewerCertificateStrategy
-    , vcMinimumProtocolVersion :: Maybe MinimumProtocolVersion
+      vcCertificateStrategy    :: !ViewerCertificateStrategy
+    , vcMinimumProtocolVersion :: !(Maybe MinimumProtocolVersion)
     } deriving (Show, Eq, Ord, Typeable)
 
 
 -------------------------------------------------------------------------------
-data ViewerCertificateStrategy = UseIAM IAMCertificateId SSLSupportMethod -- are we sure that using the default obviates SSL support method?
+data ViewerCertificateStrategy = UseIAM !IAMCertificateId !SSLSupportMethod -- are we sure that using the default obviates SSL support method?
                                | CloudFrontDefaultCertificate
                                deriving (Show, Eq, Ord, Typeable)
 
@@ -663,10 +663,10 @@ instance AwsType OriginId where
 
 -------------------------------------------------------------------------------
 data CustomErrorResponse = CustomErrorResponse {
-      cerErrorCode        :: ErrorCode
-    , cerResponsePagePath :: Maybe ObjectPath --TODO: is objectpath generally limited to 4k chars or do we need a separate type
-    , cerResponseCode     :: ResponseCode
-    , cerMinTTL           :: Maybe MinTTL
+      cerErrorCode        :: !ErrorCode
+    , cerResponsePagePath :: !(Maybe ObjectPath) --TODO: is objectpath generally limited to 4k chars or do we need a separate type
+    , cerResponseCode     :: !ResponseCode
+    , cerMinTTL           :: !(Maybe MinTTL)
     } deriving (Show, Eq, Ord, Typeable)
 
 
@@ -777,11 +777,11 @@ instance AwsType OriginAccessIdentity where
 
 -------------------------------------------------------------------------------
 data CustomOriginConfig = CustomOriginConfig {
-      cocHTTPPort             :: Maybe HTTPPort
+      cocHTTPPort             :: !(Maybe HTTPPort)
     -- ^ Defaults to 80
-    , cocHTTPSPort            :: Maybe HTTPPort
+    , cocHTTPSPort            :: !(Maybe HTTPPort)
     -- ^ Defaults to 443
-    , cocOriginProtocolPolicy :: OriginProtocolPolicy
+    , cocOriginProtocolPolicy :: !OriginProtocolPolicy
     } deriving (Show, Eq, Ord, Typeable)
 
 
@@ -1141,5 +1141,3 @@ parseViewerCertificate cursor = do
     vcCertificateStrategy    = strat
   , vcMinimumProtocolVersion = mpv
   }
-
-

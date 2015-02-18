@@ -23,7 +23,7 @@ import           Aws.CloudFront.Types
 
 
 data GetDistributionRequest = GetDistributionRequest {
-      gdrId :: DistributionId
+      gdrId :: !DistributionId
     } deriving (Show, Eq, Ord, Typeable)
 
 

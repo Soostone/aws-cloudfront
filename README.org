@@ -36,7 +36,8 @@
 
 #+OPTIONS: toc:nil
 ** TODO Travis CI setup
-** TODO Strictness analysis
+** DONE Strictness analysis
+   CLOSED: [2015-02-18 Wed 11:48]
 ** TODO Stronger error types
 ** TODO should we share some type instead of deriving our own for ObjectKey?
 ** TODO Note usage of S3OriginConfig

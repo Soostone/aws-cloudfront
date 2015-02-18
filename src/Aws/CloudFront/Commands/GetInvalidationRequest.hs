@@ -23,8 +23,8 @@ import           Aws.CloudFront.Types
 
 
 data GetInvalidationRequest = GetInvalidationRequest {
-      girDistributionId :: DistributionId
-    , girInvalidationId :: InvalidationId
+      girDistributionId :: !DistributionId
+    , girInvalidationId :: !InvalidationId
     } deriving (Show, Eq, Ord, Typeable)
 
 

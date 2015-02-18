@@ -36,8 +36,8 @@ import           Aws.CloudFront.Types
 
 -------------------------------------------------------------------------------
 data CloudFrontMetadata = CloudFrontMetadata {
-      cloudFrontMAmzId2    :: Maybe Text
-    , cloudFrontMRequestId :: Maybe Text
+      cloudFrontMAmzId2    :: !(Maybe Text)
+    , cloudFrontMRequestId :: !(Maybe Text)
     }
 
 instance Loggable CloudFrontMetadata where

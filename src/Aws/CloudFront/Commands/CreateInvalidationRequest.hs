@@ -44,9 +44,9 @@ import           Aws.CloudFront.Types
 
 
 data CreateInvalidationRequest = CreateInvalidationRequest {
-      cirPaths           :: NonEmpty ObjectPath
-    , cirCallerReference :: CreateInvalidationRequestReference
-    , cirDistributionId  :: DistributionId
+      cirPaths           :: !(NonEmpty ObjectPath)
+    , cirCallerReference :: !CreateInvalidationRequestReference
+    , cirDistributionId  :: !DistributionId
     } deriving (Show, Eq, Ord, Typeable)
 
 --TODO: returns an InvalidationResponse which is identical to the show response

@@ -32,8 +32,8 @@ import           Aws.CloudFront.Util
 
 
 data GetInvalidationListRequest = GetInvalidationListRequest {
-      gilreqMarker         :: Maybe Marker
-    , gilreqDistributionId :: DistributionId
+      gilreqMarker         :: !(Maybe Marker)
+    , gilreqDistributionId :: !DistributionId
     } deriving (Show, Eq, Ord, Typeable)
 
 
@@ -56,10 +56,10 @@ instance Transaction GetInvalidationListRequest GetInvalidationListResponse
 
 -------------------------------------------------------------------------------
 data GetInvalidationListResponse = GetInvalidationListResponse {
-      gilresCurMarker   :: Maybe Marker
-    , gilresNextMarker  :: Maybe Marker
-    , gilresIsTruncated :: Bool
-    , gilresSummaries   :: [InvalidationSummary]
+      gilresCurMarker   :: !(Maybe Marker)
+    , gilresNextMarker  :: !(Maybe Marker)
+    , gilresIsTruncated :: !Bool
+    , gilresSummaries   :: ![InvalidationSummary]
     } deriving (Show, Eq, Ord, Typeable)
 
 
@@ -118,6 +118,6 @@ parseInvalidationSummary cursor = do
 
 -------------------------------------------------------------------------------
 data InvalidationSummary = InvalidationSummary {
-      isId     :: InvalidationId
-    , isStatus :: InvalidationStatus
+      isId     :: !InvalidationId
+    , isStatus :: !InvalidationStatus
     } deriving (Show, Eq, Ord, Typeable)

@@ -31,7 +31,7 @@ import           Aws.CloudFront.Util
 
 -------------------------------------------------------------------------------
 data GetDistributionListRequest = GetDistributionListRequest {
-      gdlreqMarker :: Maybe Marker
+      gdlreqMarker :: !(Maybe Marker)
     } deriving (Show, Eq, Ord, Typeable)
 
 
@@ -50,10 +50,10 @@ instance Transaction GetDistributionListRequest GetDistributionListResponse
 
 -------------------------------------------------------------------------------
 data GetDistributionListResponse = GetDistributionListResponse {
-      gdlresCurMarker   :: Maybe Marker
-    , gdlresNextMarker  :: Maybe Marker
-    , gdlresIsTruncated :: Bool
-    , gdlresSummaries   :: [DistributionSummary]
+      gdlresCurMarker   :: !(Maybe Marker)
+    , gdlresNextMarker  :: !(Maybe Marker)
+    , gdlresIsTruncated :: !Bool
+    , gdlresSummaries   :: ![DistributionSummary]
     } deriving (Show, Eq, Ord, Typeable)
 
 
