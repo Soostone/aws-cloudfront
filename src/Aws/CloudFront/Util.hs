@@ -73,8 +73,9 @@ getContentOf
     => X.Cursor
     -> Text
     -> EitherT Text m a
-getContentOf c n = EitherT . fmap fromText' . force ("Missing element " <> T.unpack n) $
-                   c $/ le n &/ X.content
+getContentOf c n = EitherT $ do
+  e <- force ("Missing element " <> T.unpack n) $ c $/ le n
+  return . fromText' . fromMaybe mempty . listToMaybe $ e $/ X.content
 
 
 -------------------------------------------------------------------------------

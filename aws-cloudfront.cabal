@@ -46,6 +46,8 @@ library
                      , old-locale
                      , conduit
                      , containers
+                     , data-default >= 0.5.3
+
 
 
   hs-source-dirs:      src

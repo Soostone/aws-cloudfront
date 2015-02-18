@@ -78,25 +78,25 @@ import           Aws.General
 import           Control.Applicative
 import           Control.Error
 import           Control.Monad.Catch
-import           Data.ByteString     (ByteString)
+import           Data.ByteString         (ByteString)
 import           Data.Char
 import           Data.Ix
-import           Data.List           (sort)
-import           Data.List.NonEmpty  (NonEmpty (..))
+import           Data.List               (sort)
+import           Data.List.NonEmpty      (NonEmpty (..))
 import           Data.Monoid
 import           Data.String
-import           Data.Text           (Text)
-import qualified Data.Text           as T
+import           Data.Text               (Text)
+import qualified Data.Text               as T
 import           Data.Time
 import           Data.Traversable
 import           Data.Typeable
-import qualified Network.HTTP.Types  as HTTP
-import           Prelude             hiding (mapM)
-import qualified Text.Parser.Char    as PC
-import           Text.XML.Cursor     (($/), (&/))
-import qualified Text.XML.Cursor     as X
+import qualified Network.HTTP.Types      as HTTP
+import           Prelude                 hiding (mapM)
+import qualified Text.Parser.Char        as PC
+import qualified Text.Parser.Combinators as PC
+import           Text.XML.Cursor         (($/), (&/))
+import qualified Text.XML.Cursor         as X
 -------------------------------------------------------------------------------
--- import           Aws.CloudFront.Core
 import           Aws.CloudFront.Util
 -------------------------------------------------------------------------------
 
@@ -300,7 +300,7 @@ data DistributionSummary = DistributionSummary {
     , dsCustomErrorResponses :: [CustomErrorResponse]
     , dsRestrictions         :: Maybe GeoRestriction
     , dsComment              :: Maybe Text -- blank means Nothing
-    , dsLogging              :: DistributionLogging
+    , dsLogging              :: Maybe DistributionLogging
     , dsViewerCertificate    :: ViewerCertificate
     , dsPriceClass           :: PriceClass -- is this used elsewhere?
     , dsEnabled              :: Bool
@@ -752,14 +752,17 @@ instance AwsType ErrorCode where
 -- specially-formatted config string
 -- origin-access-identity/cloudfront/abcde
 newtype S3OriginConfig = S3OriginConfig {
-      s3OriginAccessIdentity :: OriginAccessIdentity
+      s3OriginAccessIdentity :: Maybe OriginAccessIdentity
     } deriving (Show, Eq, Ord, Typeable)
 
 
 instance AwsType S3OriginConfig where
-  toText (S3OriginConfig oic) = "origin-access-identity/cloudfront/" <> toText oic
-  parse = PC.text "origin-access-identity/cloudfront/" *>
-          (S3OriginConfig <$> parse)
+  toText (S3OriginConfig Nothing)    = ""
+  toText (S3OriginConfig (Just oic)) = "origin-access-identity/cloudfront/" <> toText oic
+  parse = S3OriginConfig <$> (parsePresent <|> parseNotPresent)
+    where
+      parsePresent = PC.text "origin-access-identity/cloudfront/" *> (Just <$> parse)
+      parseNotPresent = Nothing <$ PC.eof
 
 
 -------------------------------------------------------------------------------
@@ -845,8 +848,9 @@ parseDistributionSummary cursor = do
   rs <- fmap listToMaybe . mapM parseGeoRestriction $ cursor
          $/ le "Restrictions"
          &/ le "GeoRestriction"
+  lg <- fmap listToMaybe . mapM parseDistributionLogging $ cursor
+         $/ le "Logging"
   let cmnt = listToMaybe $ cursor $/ le "Comment" &/ X.content
-  lg <- parseFirst cursor "Logging" parseDistributionLogging
   vc <- parseFirst cursor "ViewerCertificate" parseViewerCertificate
   pc <- getContentOf cursor "PriceClass"
   en <- unAWSBool <$> getContentOf cursor "Enabled"

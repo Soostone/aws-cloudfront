@@ -47,6 +47,10 @@
 ** TODO Use fromString . show for toText on sum types
 ** TODO Break out parseDistributionSummary
 ** TODO reorg test modules
+** TODO Be consistent about fields that are an ID, i.e. invInvalidationId -> invId
+** TODO Not emitting request id or x-amz-id-2
+** TODO Probably drop "Request" suffix from commands. unnecessary
+** TODO Ensure not sending superfluous headers
 * Acknowledgements
   Much of the design queues for this project were derived by the
   excellent [[https://github.com/alephcloud/hs-aws-sns][aws-sns]] package by AlephCloud Systems, Inc.

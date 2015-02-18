@@ -31,6 +31,9 @@ parseDistributionListResponseTests = testGroup "parseDistributionListResponse"
   [ testCase "it parses the example xml" $ do
       res <- runEitherT =<< parseFixture "ListDistributions.xml" parseDistributionListResponse
       res @?= Right expectedDistributionListResponse
+  , testCase "it parses another example xml" $ do
+      res <- runEitherT =<< parseFixture "ListDistributions2.xml" parseDistributionListResponse
+      res @?= Right expectedDistributionListResponse2
   , testProperty "AwsType DistributionStatus" $ \(x :: DistributionStatus) ->
      prop_AWSType_cycle x
   , testProperty "AwsType DomainName" $ \(x :: DomainName) ->
@@ -87,6 +90,57 @@ expectedDistributionListResponse = GetDistributionListResponse {
 
 
 -------------------------------------------------------------------------------
+expectedDistributionListResponse2 :: GetDistributionListResponse
+expectedDistributionListResponse2 =
+   GetDistributionListResponse {
+       gdlresCurMarker = Nothing
+     , gdlresNextMarker = Nothing
+     , gdlresIsTruncated = False
+     , gdlresSummaries = [
+       DistributionSummary {
+            dsId = DistributionId {distributionIdText = "EDFDVBD6EXAMPLE"}
+          , dsStatus = DistributionDeployed
+          , dsLastModifiedTime = mkUTCTime 2012 5 19 19 37 58
+          , dsDomainName = DomainName {domainNameText = "d111111abcdef8.cloudfront.net"}
+          , dsAliases = [CName {cNameText = "www.example.com"}]
+          , dsOrigins = [
+            Origin {
+                 originId = OriginId {originIdText = "MyOrigin"}
+               , originDomainName = DomainName {domainNameText = "myawsbucket.s3.amazonaws.com.s3.amazonaws.com"}
+               , originPath = Nothing
+               , originConfig = Left S3OriginConfig {s3OriginAccessIdentity = Nothing}
+               }
+            ]
+          , dsDefaultCacheBehavior = UnqualifiedCacheBehavior {
+              cbTargetOriginId = OriginId {originIdText = "example-Amazon S3-origin"}
+            , cbForwardedValues = ForwardedValues {
+                 fvQueryString = False
+               , fvCookies = ForwardNoCookies
+               , fvHeaders = []
+               }
+            , cbTrustedSigners = TrustedSignersDisabled
+            , cbViewerProtocolPolicy = VPPAllowAll
+            , cbMinTTL = minBound
+            , cbAllowedMethods = Just AllowedMethods {amsAllowedGroup = AMGH, amsCachedGroup = CMGH}
+            , cbSmoothStreaming = False
+            }
+          , dsCacheBehaviors = []
+          , dsCustomErrorResponses = []
+          , dsRestrictions = Just GeoAllowNone
+          , dsComment = Nothing
+          , dsLogging = Nothing
+          , dsViewerCertificate = ViewerCertificate {
+              vcCertificateStrategy = CloudFrontDefaultCertificate
+            , vcMinimumProtocolVersion = Just MinSSLv3
+            }
+          , dsPriceClass = PriceClassAll
+          , dsEnabled = True
+          }
+       ]
+     }
+
+
+-------------------------------------------------------------------------------
 expectedSummary :: DistributionSummary
 expectedSummary = DistributionSummary {
       dsId = DistributionId "EDFDVBD6EXAMPLE"
@@ -100,7 +154,7 @@ expectedSummary = DistributionSummary {
     , dsCustomErrorResponses = [customErrorResponse]
     , dsRestrictions = Just geoRestriction
     , dsComment = Just "example comment"
-    , dsLogging = distributionLogging
+    , dsLogging = Just distributionLogging
     , dsViewerCertificate = viewerCertificate
     , dsPriceClass = PriceClassAll
     , dsEnabled = True
@@ -113,7 +167,7 @@ s3Origin = Origin {
       originId = OriginId "example-Amazon S3-origin"
     , originDomainName = DomainName "myawsbucket.s3.amazonaws.com"
     , originPath = Just $ ObjectPath "/production"
-    , originConfig = Left $ S3OriginConfig $ OriginAccessIdentity "E74FTE3AEXAMPLE"
+    , originConfig = Left $ S3OriginConfig $ Just $ OriginAccessIdentity "E74FTE3AEXAMPLE"
     }
 
 

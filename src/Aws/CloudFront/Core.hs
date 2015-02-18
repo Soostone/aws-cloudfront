@@ -165,10 +165,12 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
     unsignedQuery = case cloudFrontQueryMethod query of
         PostQuery -> []
         _ -> ("Action", Just . toText $ action) : cloudFrontQueryParameters query
-
+     
     -- Values that depend on the signature
+    --TODO: just collapse all these verb-based ones to one, since the get specific ones seem to be broken
     (signedQuery, amzHeaders, authorization) = case method of
-        Get -> (getQuery, getAmzHeaders, getAuthorization)
+        -- Get -> (getQuery, getAmzHeaders, getAuthorization)
+        Get -> (postQuery, getAmzHeaders, postAuthorization)
         Head -> (getQuery, getAmzHeaders, getAuthorization)
         Delete -> (getQuery, getAmzHeaders, getAuthorization)
         Post -> (postQuery, postAmzHeaders, postAuthorization)
@@ -191,7 +193,7 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
             (fromMaybe "" body)
 
     -- signature dependend values for GET request
-    getAmzHeaders = headers
+    getAmzHeaders = postAmzHeaders
     getAuthorization = Nothing
     getQuery = getSignature
     getSignature = either error id $ signGetRequest

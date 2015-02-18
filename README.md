@@ -61,6 +61,8 @@ Not at all ready for use.
 
 ## TODO reorg test modules
 
+## TODO Be consistent about fields that are an ID, i.e. invInvalidationId -> invId
+
 # Acknowledgements
 
 Much of the design queues for this project were derived by the
