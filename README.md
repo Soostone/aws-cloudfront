@@ -1,6 +1,6 @@
 # aws-cloudfront
 
-[travis-ci.org/Soostone/aws-cloudfront.svg](https://travis-ci.org/Soostone/aws-cloudfront)
+[![img](https://travis-ci.org/Soostone/aws-cloudfront.svg)](https://travis-ci.org/Soostone/aws-cloudfront)
 
 Bindings for AWS CloudFront
 
