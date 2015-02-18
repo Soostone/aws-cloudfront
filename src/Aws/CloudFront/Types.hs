@@ -93,6 +93,7 @@ import           Data.Typeable
 import qualified Network.HTTP.Types      as HTTP
 import           Prelude                 hiding (mapM)
 import qualified Text.Parser.Char        as PC
+import           Text.Parser.Combinators ((<?>))
 import qualified Text.Parser.Combinators as PC
 import           Text.XML.Cursor         (($/), (&/))
 import qualified Text.XML.Cursor         as X
@@ -228,8 +229,7 @@ data InvalidationStatus = InvalidationInProgress
 instance AwsType InvalidationStatus where
   toText InvalidationInProgress = "InProgress"
   toText InvalidationCompleted = "Completed"
-  parse = parseInProgress <|>
-          parseCompleted
+  parse = (parseInProgress <|> parseCompleted) <?> "parse InvalidationCompleted"
     where
       parseInProgress = PC.text "InProgress" *> pure InvalidationInProgress
       parseCompleted = PC.text "Completed" *> pure InvalidationCompleted
@@ -316,8 +316,8 @@ data DistributionStatus = DistributionDeployed
 instance AwsType DistributionStatus where
   toText DistributionDeployed = "Deployed"
   toText DistributionInProgress = "InProgress"
-  parse = (DistributionDeployed <$ PC.text "Deployed") <|>
-          (DistributionInProgress <$ PC.text "InProgress")
+  parse = ((DistributionDeployed <$ PC.text "Deployed") <|>
+          (DistributionInProgress <$ PC.text "InProgress")) <?> "parse DistributionStatus"
 
 
 -------------------------------------------------------------------------------
@@ -471,8 +471,8 @@ data AccountNumber = SelfAccountNumber
 instance AwsType AccountNumber where
   toText SelfAccountNumber = "self"
   toText (OtherAccountNumber i) = toText i
-  parse = (SelfAccountNumber <$ PC.text "self") <|>
-          (OtherAccountNumber <$> parse)
+  parse = ((SelfAccountNumber <$ PC.text "self") <|>
+          (OtherAccountNumber <$> parse)) <?> "parse AccountNumber"
 
 
 -------------------------------------------------------------------------------
@@ -486,9 +486,9 @@ instance AwsType ViewerProtocolPolicy where
   toText VPPAllowAll        = "allow-all"
   toText VPPRedirectToHTTPS = "redirect-to-https"
   toText VPPHTTPSOnly       = "https-only"
-  parse = (VPPAllowAll <$ PC.text "allow-all") <|>
+  parse = ((VPPAllowAll <$ PC.text "allow-all") <|>
           (VPPRedirectToHTTPS <$ PC.text "redirect-to-https") <|>
-          (VPPHTTPSOnly <$ PC.text "https-only")
+          (VPPHTTPSOnly <$ PC.text "https-only")) <?> "parse ViewerProtocolPolicy"
 
 
 -------------------------------------------------------------------------------
@@ -592,9 +592,9 @@ instance AwsType PriceClass where
   toText PriceClassAll = "PriceClass_All"
   toText PriceClass200 = "PriceClass_200"
   toText PriceClass100 = "PriceClass_100"
-  parse = (PriceClassAll <$ PC.text "PriceClass_All") <|>
+  parse = ((PriceClassAll <$ PC.text "PriceClass_All") <|>
           (PriceClass200 <$ PC.text "PriceClass_200") <|>
-          (PriceClass100 <$ PC.text "PriceClass_100")
+          (PriceClass100 <$ PC.text "PriceClass_100")) <?> "parse PriceClass"
 
 
 -------------------------------------------------------------------------------
@@ -633,8 +633,8 @@ data SSLSupportMethod = VIP
 instance AwsType SSLSupportMethod where
   toText VIP     = "vip"
   toText SniOnly = "sni-only"
-  parse = (VIP <$ PC.text "vip") <|>
-          (SniOnly <$ PC.text "sni-only")
+  parse = ((VIP <$ PC.text "vip") <|>
+          (SniOnly <$ PC.text "sni-only")) <?> "parse SSLSupportMethod"
 
 
 -------------------------------------------------------------------------------
@@ -646,8 +646,8 @@ data MinimumProtocolVersion = MinSSLv3
 instance AwsType MinimumProtocolVersion where
   toText MinSSLv3 = "SSLv3"
   toText MinTLSv1 = "TLSv1"
-  parse = (MinSSLv3 <$ PC.text "SSLv3") <|>
-          (MinTLSv1 <$ PC.text "TLSv1")
+  parse = ((MinSSLv3 <$ PC.text "SSLv3") <|>
+          (MinTLSv1 <$ PC.text "TLSv1")) <?> "parse MinimumProtocolVersion"
 
 
 -------------------------------------------------------------------------------
@@ -698,7 +698,7 @@ instance AwsType ResponseCode where
   toText RC502 = "502"
   toText RC503 = "503"
   toText RC504 = "504"
-  parse = (RC200 <$ PC.text "200") <|>
+  parse = ((RC200 <$ PC.text "200") <|>
           (RC400 <$ PC.text "400") <|>
           (RC403 <$ PC.text "403") <|>
           (RC404 <$ PC.text "404") <|>
@@ -708,7 +708,7 @@ instance AwsType ResponseCode where
           (RC501 <$ PC.text "501") <|>
           (RC502 <$ PC.text "502") <|>
           (RC503 <$ PC.text "503") <|>
-          (RC504 <$ PC.text "504")
+          (RC504 <$ PC.text "504")) <?> "parse ResponseCode"
 
 
 -------------------------------------------------------------------------------
@@ -735,7 +735,7 @@ instance AwsType ErrorCode where
   toText EC502 = "502"
   toText EC503 = "503"
   toText EC504 = "504"
-  parse = (EC400 <$ PC.text "400") <|>
+  parse = ((EC400 <$ PC.text "400") <|>
           (EC403 <$ PC.text "403") <|>
           (EC404 <$ PC.text "404") <|>
           (EC405 <$ PC.text "405") <|>
@@ -744,7 +744,7 @@ instance AwsType ErrorCode where
           (EC501 <$ PC.text "501") <|>
           (EC502 <$ PC.text "502") <|>
           (EC503 <$ PC.text "503") <|>
-          (EC504 <$ PC.text "504")
+          (EC504 <$ PC.text "504")) <?> "parse ErrorCode"
 
 
 -------------------------------------------------------------------------------
@@ -759,7 +759,7 @@ newtype S3OriginConfig = S3OriginConfig {
 instance AwsType S3OriginConfig where
   toText (S3OriginConfig Nothing)    = ""
   toText (S3OriginConfig (Just oic)) = "origin-access-identity/cloudfront/" <> toText oic
-  parse = S3OriginConfig <$> (parsePresent <|> parseNotPresent)
+  parse = (S3OriginConfig <$> (parsePresent <|> parseNotPresent)) <?> "parse S3OriginConfig"
     where
       parsePresent = PC.text "origin-access-identity/cloudfront/" *> (Just <$> parse)
       parseNotPresent = Nothing <$ PC.eof
@@ -796,8 +796,8 @@ data OriginProtocolPolicy = OPPHTTPOnly
 instance AwsType OriginProtocolPolicy where
   toText OPPHTTPOnly    = "http-only"
   toText OPPMatchViewer = "match-viewer"
-  parse = (OPPHTTPOnly <$ PC.text "http-only") <|>
-          (OPPMatchViewer <$ PC.text "match-viewer")
+  parse = ((OPPHTTPOnly <$ PC.text "http-only") <|>
+          (OPPMatchViewer <$ PC.text "match-viewer")) <?> "parse OriginProtocolPolicy"
 
 -------------------------------------------------------------------------------
 -- | 80, 443, or 1024-65535 inclusive
@@ -814,7 +814,7 @@ mkHTTPPort n
 
 instance AwsType HTTPPort where
   toText (HTTPPort n) = fromString $ show n
-  parse = HTTPPort <$> parseInt
+  parse = (HTTPPort <$> parseInt) <?> "parse HTTPPort"
 
 
 -------------------------------------------------------------------------------

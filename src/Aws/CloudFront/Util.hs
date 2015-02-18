@@ -17,6 +17,7 @@ import qualified Data.Text               as T
 import           Data.Time
 import           System.Locale
 import qualified Text.Parser.Char        as PC
+import           Text.Parser.Combinators ((<?>))
 import qualified Text.Parser.Combinators as PC
 import           Text.XML.Cursor         (($/), ($|), (&/))
 import qualified Text.XML.Cursor         as X
@@ -100,9 +101,11 @@ newtype AWSUTCTime = AWSUTCTime {
 -------------------------------------------------------------------------------
 instance AwsType AWSUTCTime where
   toText = fromString . formatTime defaultTimeLocale awsTimeFmt . unAWSUTCTime
-  parse = do
-    s <- parseString
-    maybe (fail $ "could not parse UTCTime string " <> s) return $ parseTime defaultTimeLocale awsTimeFmt s
+  parse = parse' <?> "parse AWSUTCTime"
+    where
+      parse' = do
+        s <- parseString
+        maybe (fail $ "could not parse UTCTime string " <> s) return $ parseTime defaultTimeLocale awsTimeFmt s
 
 
 -------------------------------------------------------------------------------
@@ -119,8 +122,8 @@ newtype AWSBool = AWSBool {
 instance AwsType AWSBool where
   toText (AWSBool True) = "true"
   toText (AWSBool False) = "false"
-  parse = (AWSBool True <$ PC.text "true") <|>
-          (AWSBool False <$ PC.text "false")
+  parse = ((AWSBool True <$ PC.text "true") <|>
+          (AWSBool False <$ PC.text "false")) <?> "parse AWSBool"
 
 
 -------------------------------------------------------------------------------

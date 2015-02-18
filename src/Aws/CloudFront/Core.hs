@@ -26,6 +26,7 @@ import           Data.Typeable
 import qualified Network.HTTP.Conduit     as HTTP
 import qualified Network.HTTP.Types       as HTTP
 import qualified Text.Parser.Char         as PC
+import           Text.Parser.Combinators  ((<?>))
 import qualified Text.Parser.Combinators  as PC
 import qualified Text.XML                 as X
 import           Text.XML.Cursor          hiding (force)
@@ -201,10 +202,10 @@ data CloudFrontAction = CreateInvalidation
 
 instance AwsType CloudFrontAction where
   toText = fromString . show
-  parse = (CreateInvalidation <$ tok "CreateInvalidation")   <|>
+  parse = ((CreateInvalidation <$ tok "CreateInvalidation")  <|>
           (GetInvalidationList <$ tok "GetInvalidationList") <|>
           (GetInvalidation <$ tok "GetInvalidation")         <|>
           (GetDistributionList <$ tok "GetDistributionList") <|>
-          (GetDistribution <$ tok "GetDistribution")
+          (GetDistribution <$ tok "GetDistribution")) <?> "parse CloudFrontAction"
     where
       tok t = PC.text t <* PC.eof

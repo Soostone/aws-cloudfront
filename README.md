@@ -47,7 +47,7 @@ Not at all ready for use.
 
 ## TODO Note usage of S3OriginConfig
 
-## TODO Use <?> to annotate all parsers
+## DONE Use <?> to annotate all parsers
 
 ## TODO Doc header in all modules
 
