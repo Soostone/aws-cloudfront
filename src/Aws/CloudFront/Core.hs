@@ -26,6 +26,7 @@ import           Data.Typeable
 import qualified Network.HTTP.Conduit     as HTTP
 import qualified Network.HTTP.Types       as HTTP
 import qualified Text.Parser.Char         as PC
+import qualified Text.Parser.Combinators  as PC
 import qualified Text.XML                 as X
 import           Text.XML.Cursor          hiding (force)
 -------------------------------------------------------------------------------
@@ -126,7 +127,7 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
     , sqHost = host
     , sqPort = 443
     , sqPath = BB.toByteString $ HTTP.encodePathSegments path
-    , sqQuery = HTTP.queryTextToQuery signedQuery
+    , sqQuery = HTTP.queryTextToQuery unsignedQuery
     , sqDate = Nothing
     , sqAuthorization = authorization
     , sqContentType = contentType
@@ -134,28 +135,27 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
     , sqAmzHeaders = amzHeaders
     , sqOtherHeaders = [] -- headers -- we put everything into amzHeaders
     , sqBody = HTTP.RequestBodyBS <$> body
-    , sqStringToSign = mempty -- Let me know if you really need this...
+    , sqStringToSign = mempty
     }
   where
-    -- values that don't depend on the signature
     action = cloudFrontQueryAction query
     path = apiVersion:(cloudFrontQueryPathSegments query)
     apiVersion = "2014-11-06"
     host = "cloudfront.amazonaws.com"
     headers = [("host", host)]
     contentType = case cloudFrontQueryMethod query of
-        Post -> Just "application/xml"
-        Get -> Nothing
+        Post      -> Just "application/xml"
+        Get       -> Nothing
         PostQuery -> Just "application/x-www-form-urlencoded; charset=utf-8"
 
         -- The following cases are currently not supported
-        Put -> Just "application/xml"
-        Delete -> Nothing
-        Head -> Nothing
+        Put       -> Just "application/xml"
+        Delete    -> Nothing
+        Head      -> Nothing
 
     method = case cloudFrontQueryMethod query of
         PostQuery -> Post
-        x -> x
+        x         -> x
 
     body = case cloudFrontQueryMethod query of
         PostQuery -> Just $ BB.toByteString $ HTTP.renderQueryText False --TODO: probably scrap
@@ -165,48 +165,23 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
     unsignedQuery = case cloudFrontQueryMethod query of
         PostQuery -> []
         _ -> ("Action", Just . toText $ action) : cloudFrontQueryParameters query
-     
-    -- Values that depend on the signature
-    --TODO: just collapse all these verb-based ones to one, since the get specific ones seem to be broken
-    (signedQuery, amzHeaders, authorization) = case method of
-        -- Get -> (getQuery, getAmzHeaders, getAuthorization)
-        Get -> (postQuery, getAmzHeaders, postAuthorization)
-        Head -> (getQuery, getAmzHeaders, getAuthorization)
-        Delete -> (getQuery, getAmzHeaders, getAuthorization)
-        Post -> (postQuery, postAmzHeaders, postAuthorization)
-        PostQuery -> (postQuery, postAmzHeaders, postAuthorization)
-        Put -> (postQuery, postAmzHeaders, postAuthorization)
-
     -- signatue dependend values for POST request
-    postAmzHeaders = filter ((/= "Authorization") . fst) postSignature
-    postAuthorization = return <$> lookup "authorization" postSignature
-    postQuery = unsignedQuery
-    postSignature = either error id $ signPostRequest
-            (cred2cred $ signatureCredentials sigData)
-            region
-            ServiceNamespaceCloudfront
-            (signatureTime sigData)
-            (httpMethod method)
-            path
-            unsignedQuery
-            headers
-            (fromMaybe "" body)
-
-    -- signature dependend values for GET request
-    getAmzHeaders = postAmzHeaders
-    getAuthorization = Nothing
-    getQuery = getSignature
-    getSignature = either error id $ signGetRequest
-            (cred2cred $ signatureCredentials sigData)
-            region
-            ServiceNamespaceCloudfront
-            (signatureTime sigData)
-            (httpMethod method)
-            path
-            unsignedQuery
-            headers
-            (fromMaybe "" body)
-    region = UsEast1 -- cloudfront is regionlist, so we have to supply us-east-1 apparently http://stackoverflow.com/questions/24603625/aws-cloudfront-credential-should-be-scoped-to-a-valid-region
+    amzHeaders = filter ((/= "Authorization") . fst) mkSignature
+    authorization = return <$> lookup "authorization" mkSignature
+    mkSignature = either error id $ signPostRequest
+                  (cred2cred $ signatureCredentials sigData)
+                  region
+                  ServiceNamespaceCloudfront
+                  (signatureTime sigData)
+                  (httpMethod method)
+                  path
+                  unsignedQuery
+                  headers
+                  (fromMaybe "" body)
+    -- cloudfront is regionlist, so we have to supply us-east-1
+    -- apparently
+    -- http://stackoverflow.com/questions/24603625/aws-cloudfront-credential-should-be-scoped-to-a-valid-region
+    region = UsEast1
 
 #if MIN_VERSION_aws(0,9,2)
     cred2cred (Credentials a b c _) = SignatureV4Credentials a b c Nothing
@@ -223,12 +198,13 @@ data CloudFrontAction = CreateInvalidation
                       | GetDistributionList
                       deriving (Show, Eq, Ord, Typeable)
 
---TODO: but why is this needed? i don't think this hits the cloudfront use case
---TODO: having an EOS would prevent us from having to shift precedence so much
+
 instance AwsType CloudFrontAction where
   toText = fromString . show
-  parse = (CreateInvalidation <$ PC.text "CreateInvalidation") <|>
-          (GetInvalidationList <$ PC.text "GetInvalidationList") <|>
-          (GetInvalidation <$ PC.text "GetInvalidation") <|>
-          (GetDistributionList <$ PC.text "GetDistributionList") <|>
-          (GetDistribution <$ PC.text "GetDistribution")
+  parse = (CreateInvalidation <$ tok "CreateInvalidation")   <|>
+          (GetInvalidationList <$ tok "GetInvalidationList") <|>
+          (GetInvalidation <$ tok "GetInvalidation")         <|>
+          (GetDistributionList <$ tok "GetDistributionList") <|>
+          (GetDistribution <$ tok "GetDistribution")
+    where
+      tok t = PC.text t <* PC.eof
