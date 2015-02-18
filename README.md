@@ -57,7 +57,7 @@ Not at all ready for use.
 
 ## TODO Use fromString . show for toText on sum types
 
-## TODO Break out parseDistributionSummary
+## DONE Break out parseDistributionSummary
 
 ## TODO reorg test modules
 
