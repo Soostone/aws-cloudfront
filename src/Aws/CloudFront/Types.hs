@@ -229,7 +229,7 @@ data InvalidationStatus = InvalidationInProgress
 instance AwsType InvalidationStatus where
   toText InvalidationInProgress = "InProgress"
   toText InvalidationCompleted = "Completed"
-  parse = (parseInProgress <|> parseCompleted) <?> "parse InvalidationCompleted"
+  parse = (parseInProgress <|> parseCompleted) <?> "parse InvalidationStatus"
     where
       parseInProgress = PC.text "InProgress" *> pure InvalidationInProgress
       parseCompleted = PC.text "Completed" *> pure InvalidationCompleted
