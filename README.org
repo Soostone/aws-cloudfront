@@ -47,11 +47,13 @@
 ** TODO Doc header in all modules
 ** TODO README examples
 ** TODO Move types and parsers into Types module
-** TODO Use fromString . show for toText on sum types
+** DONE Use fromString . show for toText on sum types
+   CLOSED: [2015-02-23 Mon 11:04]
 ** DONE Break out parseDistributionSummary
    CLOSED: [2015-02-18 Wed 11:50]
 ** TODO reorg test modules
-** TODO Be consistent about fields that are an ID, i.e. invInvalidationId -> invId
+** DONE Be consistent about fields that are an ID, i.e. invInvalidationId -> invId
+   CLOSED: [2015-02-23 Mon 11:07]
 ** TODO Not emitting request id or x-amz-id-2
 ** TODO Probably drop "Request" suffix from commands. unnecessary
 ** TODO Ensure not sending superfluous headers

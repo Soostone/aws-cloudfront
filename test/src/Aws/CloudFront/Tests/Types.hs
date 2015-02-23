@@ -36,6 +36,6 @@ expectedInvalidation = Invalidation {
       invStatus          = InvalidationInProgress
     , invPaths           = ObjectPath "/foo/bar.html" :| [ObjectPath "/foo/baz.html"]
     , invCallerReference = CreateInvalidationRequestReference "1234567890"
-    , invInvalidationId  =  InvalidationId "123"
+    , invId              =  InvalidationId "123"
     , invCreateTime      = mkUTCTime 2009 11 19 19 37 58
     }

@@ -57,13 +57,13 @@ Not at all ready for use.
 
 ## TODO Move types and parsers into Types module
 
-## TODO Use fromString . show for toText on sum types
+## DONE Use fromString . show for toText on sum types
 
 ## DONE Break out parseDistributionSummary
 
 ## TODO reorg test modules
 
-## TODO Be consistent about fields that are an ID, i.e. invInvalidationId -> invId
+## DONE Be consistent about fields that are an ID, i.e. invInvalidationId -> invId
 
 ## TODO Not emitting request id or x-amz-id-2
 

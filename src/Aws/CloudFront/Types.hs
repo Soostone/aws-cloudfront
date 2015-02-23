@@ -215,7 +215,7 @@ data Invalidation = Invalidation {
       invStatus          :: !InvalidationStatus
     , invPaths           :: !(NonEmpty ObjectPath)
     , invCallerReference :: !CreateInvalidationRequestReference
-    , invInvalidationId  :: !InvalidationId
+    , invId              :: !InvalidationId
     , invCreateTime      :: !UTCTime
     } deriving (Show, Eq, Ord, Typeable)
 
@@ -270,7 +270,7 @@ parseInvalidation cursor = do
   return Invalidation { invStatus = stat
                       , invPaths = pathsNE
                       , invCallerReference = cref
-                      , invInvalidationId = i
+                      , invId = i
                       , invCreateTime = ct
                       }
 
