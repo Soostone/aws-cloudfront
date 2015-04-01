@@ -1,7 +1,7 @@
 name:                aws-cloudfront
 version:             0.0.1
 synopsis:            Bindings for AWS CloudFront
-license:             MIT
+license:             BSD3
 license-file:        LICENSE
 author:              Michael Xavier <michael.xavier@soostone.com>
 maintainer:          Michael Xavier <michael.xavier@soostone.com>
