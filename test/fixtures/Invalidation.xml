@@ -4,7 +4,7 @@
    <CreateTime>2009-11-19T19:37:58Z</CreateTime>
    <InvalidationBatch>
       <Paths>
-         <Quantity>3</Quantity>
+         <Quantity>2</Quantity>
          <Items>
             <Path>/foo/bar.html</Path>
             <Path>/foo/baz.html</Path>
