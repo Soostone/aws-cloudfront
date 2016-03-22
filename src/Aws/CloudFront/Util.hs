@@ -73,8 +73,8 @@ getContentOf
     :: (Functor m, MonadThrow m, AwsType a)
     => X.Cursor
     -> Text
-    -> EitherT Text m a
-getContentOf c n = EitherT $ do
+    -> ExceptT Text m a
+getContentOf c n = ExceptT $ do
   e <- force ("Missing element " <> T.unpack n) $ c $/ le n
   return . fromText' . fromMaybe mempty . listToMaybe $ e $/ X.content
 
@@ -128,7 +128,7 @@ instance AwsType AWSBool where
 
 -------------------------------------------------------------------------------
 --TODO: off to Util with ye
-ftMaybe :: (Monad m, AwsType a) => [Text] -> EitherT Text m (Maybe a)
+ftMaybe :: (Monad m, AwsType a) => [Text] -> ExceptT Text m (Maybe a)
 ftMaybe [] = return Nothing
 ftMaybe (x:_) = hoistEither (Just <$> fromText' x)
 
@@ -139,7 +139,7 @@ ftList
     :: (MonadThrow m, AwsType a)
     => X.Cursor
     -> Text
-    -> EitherT Text m [a]
+    -> ExceptT Text m [a]
 ftList cursor n =
   hoistEither . mapM fromText' $ cursor
     $/ le "Items"

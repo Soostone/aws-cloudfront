@@ -74,7 +74,7 @@ instance ResponseConsumer r GetInvalidationListResponse where
   responseConsumer _ = cloudFrontXmlResponseConsumer p
     where
       p cursor = do
-        res <- runEitherT $ parseInvalidationListResponse cursor
+        res <- runExceptT $ parseInvalidationListResponse cursor
         case res of
           Left e -> decodeError $ formatError e
           Right r -> return r
@@ -85,7 +85,7 @@ instance ResponseConsumer r GetInvalidationListResponse where
 parseInvalidationListResponse
     :: (Applicative m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m GetInvalidationListResponse
+    -> ExceptT Text m GetInvalidationListResponse
 parseInvalidationListResponse cursor = do
   cloudFrontCheckResponseType () "InvalidationList" cursor
   m <- ftMaybe $ cursor $/ le "Marker" &/ X.content
@@ -105,7 +105,7 @@ parseInvalidationListResponse cursor = do
 parseInvalidationSummary
     :: (Applicative m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m InvalidationSummary
+    -> ExceptT Text m InvalidationSummary
 parseInvalidationSummary cursor = do
     i   <- getContentOf cursor "Id"
     s   <- getContentOf cursor "Status"

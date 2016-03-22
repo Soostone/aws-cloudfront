@@ -59,7 +59,7 @@ instance ResponseConsumer r GetDistributionResponse where
   responseConsumer _ = cloudFrontXmlResponseConsumer p
     where
       p cursor = do
-        res <- runEitherT $ parseDistributionSummary cursor
+        res <- runExceptT $ parseDistributionSummary cursor
         case res of
           Left e -> decodeError $ formatError e
           Right r -> return $ GetDistributionResponse r

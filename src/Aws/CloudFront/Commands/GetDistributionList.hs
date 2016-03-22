@@ -68,7 +68,7 @@ instance ResponseConsumer r GetDistributionListResponse where
   responseConsumer _ = cloudFrontXmlResponseConsumer p
     where
       p cursor = do
-        res <- runEitherT $ parseDistributionListResponse cursor
+        res <- runExceptT $ parseDistributionListResponse cursor
         case res of
           Left e -> decodeError $ formatError e
           Right r -> return r
@@ -80,7 +80,7 @@ instance ResponseConsumer r GetDistributionListResponse where
 parseDistributionListResponse
     :: (Applicative m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m GetDistributionListResponse
+    -> ExceptT Text m GetDistributionListResponse
 parseDistributionListResponse cursor = do
   cloudFrontCheckResponseType () "DistributionList" cursor
   m <- ftMaybe $ cursor $/ le "Marker" &/ X.content

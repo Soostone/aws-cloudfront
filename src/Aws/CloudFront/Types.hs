@@ -132,7 +132,7 @@ ftNonEmpty
     :: (MonadThrow m, AwsType a)
     => X.Cursor
     -> Text
-    -> EitherT Text m (NonEmpty a)
+    -> ExceptT Text m (NonEmpty a)
 ftNonEmpty cursor n = do
   xs <- ftList cursor n
   case xs of
@@ -250,7 +250,7 @@ instance AwsType InvalidationId where
 parseInvalidation
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m Invalidation
+    -> ExceptT Text m Invalidation
 parseInvalidation cursor = do
   cloudFrontCheckResponseType () "Invalidation" cursor
   i <- getContentOf cursor "Id"
@@ -259,14 +259,14 @@ parseInvalidation cursor = do
   batch <- force "Missing InvalidationBatch" $ cursor
            $/ le "InvalidationBatch"
   cref <- getContentOf batch "CallerReference"
-  paths <- right $ batch
+  paths <- return $ batch
            $/ le "Paths"
            &/ le "Items" --TODO: extract Items parsing
            &/ le "Path"
            &/ X.content
   pathsNE <- case paths of
     (x:xs) -> hoistEither (traverse fromText' $ x :| xs)
-    _ -> throwT "Empty Paths tag"
+    _ -> throwE "Empty Paths tag"
   return Invalidation { invStatus = stat
                       , invPaths = pathsNE
                       , invCallerReference = cref
@@ -821,7 +821,7 @@ instance AwsType HTTPPort where
 parseDistributionSummary
     :: (Applicative m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m DistributionSummary
+    -> ExceptT Text m DistributionSummary
 parseDistributionSummary cursor = do
   i   <- getContentOf cursor "Id"
   s   <- getContentOf cursor "Status"
@@ -879,7 +879,7 @@ parseDistributionSummary cursor = do
 parseOrigin
     :: (Monad m, Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m Origin
+    -> ExceptT Text m Origin
 parseOrigin cursor = do
   i <- getContentOf cursor "Id"
   dn <- getContentOf cursor "DomainName"
@@ -903,7 +903,7 @@ parseOrigin cursor = do
 parseGeoRestriction
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m GeoRestriction
+    -> ExceptT Text m GeoRestriction
 parseGeoRestriction cursor = do
     ty <- force "Missing RestrictionType" $ cursor
           $/ le "RestrictionType"
@@ -925,7 +925,7 @@ parseGeoRestriction cursor = do
 parseS3OriginConfig
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m S3OriginConfig
+    -> ExceptT Text m S3OriginConfig
 parseS3OriginConfig cursor = getContentOf cursor "OriginAccessIdentity"
 
 
@@ -933,7 +933,7 @@ parseS3OriginConfig cursor = getContentOf cursor "OriginAccessIdentity"
 parseCustomOriginConfig
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m CustomOriginConfig
+    -> ExceptT Text m CustomOriginConfig
 parseCustomOriginConfig cursor = do
   hp <- ftMaybe $ cursor $/ le "HTTPPort" &/ X.content
   hsp <- ftMaybe $ cursor $/ le "HTTPSPort" &/ X.content
@@ -949,7 +949,7 @@ parseCustomOriginConfig cursor = do
 parseUnqualifiedCacheBehavior
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m UnqualifiedCacheBehavior
+    -> ExceptT Text m UnqualifiedCacheBehavior
 parseUnqualifiedCacheBehavior cursor = do
   oid <- getContentOf cursor "TargetOriginId"
   fvs <- parseFirst cursor "ForwardedValues" parseForwardedValues
@@ -974,7 +974,7 @@ parseUnqualifiedCacheBehavior cursor = do
 parseTrustedSignersSettings
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m TrustedSignersSettings
+    -> ExceptT Text m TrustedSignersSettings
 parseTrustedSignersSettings cursor = do
   e <- unAWSBool <$> getContentOf cursor "Enabled"
   if e
@@ -987,7 +987,7 @@ parseTrustedSignersSettings cursor = do
 parseAllowedMethods
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m AllowedMethods
+    -> ExceptT Text m AllowedMethods
 parseAllowedMethods cursor = do
   amg <- parseAllowedMethodGroup cursor
   cms <- force "Missing CachedMethods" $ cursor $/ le "CachedMethods"
@@ -1001,7 +1001,7 @@ parseAllowedMethods cursor = do
 parseAllowedMethodGroup
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m AllowedMethodGroup
+    -> ExceptT Text m AllowedMethodGroup
 parseAllowedMethodGroup cursor = do
   let ms = sort $ cursor
         $/ le "Items"
@@ -1018,7 +1018,7 @@ parseAllowedMethodGroup cursor = do
 parseCachedMethodGroup
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m CachedMethodGroup
+    -> ExceptT Text m CachedMethodGroup
 parseCachedMethodGroup cursor = do
   let ms = sort $ cursor
         $/ le "Items"
@@ -1034,7 +1034,7 @@ parseCachedMethodGroup cursor = do
 parseForwardedValues
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m ForwardedValues
+    -> ExceptT Text m ForwardedValues
 parseForwardedValues cursor = do
   qs      <- unAWSBool <$> getContentOf cursor "QueryString"
   cks     <- parseFirst cursor "Cookies" parseCookieFowarding
@@ -1051,7 +1051,7 @@ parseForwardedValues cursor = do
 parseCookieFowarding
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m CookieForwarding
+    -> ExceptT Text m CookieForwarding
 parseCookieFowarding cursor = do
   fwd <- force "Missing Foward" $ cursor
          $/ le "Forward"
@@ -1070,7 +1070,7 @@ parseCookieFowarding cursor = do
 parseCacheBehavior
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m CacheBehavior
+    -> ExceptT Text m CacheBehavior
 parseCacheBehavior cursor = do
   pp <- getContentOf cursor "PathPattern"
   cb <- parseUnqualifiedCacheBehavior cursor
@@ -1084,7 +1084,7 @@ parseCacheBehavior cursor = do
 parseCustomErrorResponse
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m CustomErrorResponse
+    -> ExceptT Text m CustomErrorResponse
 parseCustomErrorResponse cursor = do
   ec <- getContentOf cursor "ErrorCode"
   rpp <- ftMaybe $ cursor
@@ -1106,7 +1106,7 @@ parseCustomErrorResponse cursor = do
 parseDistributionLogging
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m DistributionLogging
+    -> ExceptT Text m DistributionLogging
 parseDistributionLogging cursor = do
   en <- unAWSBool <$> getContentOf cursor "Enabled"
   ic <- unAWSBool <$> getContentOf cursor "IncludeCookies"
@@ -1124,7 +1124,7 @@ parseDistributionLogging cursor = do
 parseViewerCertificate
     :: (Functor m, MonadThrow m)
     => X.Cursor
-    -> EitherT Text m ViewerCertificate
+    -> ExceptT Text m ViewerCertificate
 parseViewerCertificate cursor = do
   mcid <- ftMaybe $ cursor
          $/ le "IAMCertificateId"

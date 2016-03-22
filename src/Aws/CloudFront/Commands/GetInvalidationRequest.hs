@@ -62,7 +62,7 @@ instance ResponseConsumer r GetInvalidationResponse where
   responseConsumer _ = cloudFrontXmlResponseConsumer p
     where
       p cursor = do
-        res <- runEitherT $ parseInvalidation cursor
+        res <- runExceptT $ parseInvalidation cursor
         case res of
           Left e -> decodeError $ formatError e
           Right r -> return $ GetInvalidationResponse r
