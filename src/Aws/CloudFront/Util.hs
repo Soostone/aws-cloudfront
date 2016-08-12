@@ -15,6 +15,7 @@ import           Data.String
 import           Data.Text               (Text)
 import qualified Data.Text               as T
 import           Data.Time
+import qualified Data.Time.Locale.Compat as LC
 import           System.Locale
 import qualified Text.Parser.Char        as PC
 import           Text.Parser.Combinators ((<?>))
@@ -100,12 +101,12 @@ newtype AWSUTCTime = AWSUTCTime {
 
 -------------------------------------------------------------------------------
 instance AwsType AWSUTCTime where
-  toText = fromString . formatTime defaultTimeLocale awsTimeFmt . unAWSUTCTime
+  toText = fromString . formatTime LC.defaultTimeLocale awsTimeFmt . unAWSUTCTime
   parse = parse' <?> "parse AWSUTCTime"
     where
       parse' = do
         s <- parseString
-        maybe (fail $ "could not parse UTCTime string " <> s) return $ parseTime defaultTimeLocale awsTimeFmt s
+        maybe (fail $ "could not parse UTCTime string " <> s) return $ parseTime LC.defaultTimeLocale awsTimeFmt s
 
 
 -------------------------------------------------------------------------------

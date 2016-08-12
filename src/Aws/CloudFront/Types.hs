@@ -259,11 +259,11 @@ parseInvalidation cursor = do
   batch <- force "Missing InvalidationBatch" $ cursor
            $/ le "InvalidationBatch"
   cref <- getContentOf batch "CallerReference"
-  paths <- return $ batch
-           $/ le "Paths"
-           &/ le "Items" --TODO: extract Items parsing
-           &/ le "Path"
-           &/ X.content
+  let paths = batch
+              $/ le "Paths"
+              &/ le "Items" --TODO: extract Items parsing
+              &/ le "Path"
+              &/ X.content
   pathsNE <- case paths of
     (x:xs) -> hoistEither (traverse fromText' $ x :| xs)
     _ -> throwE "Empty Paths tag"

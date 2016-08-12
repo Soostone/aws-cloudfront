@@ -28,7 +28,7 @@ library
                     , Aws.CloudFront.Commands.GetInvalidationRequest
                     , Aws.CloudFront.Util
   build-depends:       base >= 4.6 && < 5
-                     , aws  >= 0.10  && < 0.14
+                     , aws  >= 0.10  && < 0.15
                      , aws-general >= 0.2
                      , http-types
                      , semigroups
@@ -43,6 +43,7 @@ library
                      , exceptions
                      , errors >= 2.0 && < 2.2
                      , time
+                     , time-locale-compat
                      , old-locale
                      , conduit
                      , containers

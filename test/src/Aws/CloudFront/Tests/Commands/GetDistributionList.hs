@@ -29,10 +29,10 @@ tests = testGroup "Aws.CloudFront.Commands.GetDistributionList"
 parseDistributionListResponseTests :: TestTree
 parseDistributionListResponseTests = testGroup "parseDistributionListResponse"
   [ testCase "it parses the example xml" $ do
-      res <- runEitherT =<< parseFixture "ListDistributions.xml" parseDistributionListResponse
+      res <- runExceptT =<< parseFixture "ListDistributions.xml" parseDistributionListResponse
       res @?= Right expectedDistributionListResponse
   , testCase "it parses another example xml" $ do
-      res <- runEitherT =<< parseFixture "ListDistributions2.xml" parseDistributionListResponse
+      res <- runExceptT =<< parseFixture "ListDistributions2.xml" parseDistributionListResponse
       res @?= Right expectedDistributionListResponse2
   , testProperty "AwsType DistributionStatus" $ \(x :: DistributionStatus) ->
      prop_AWSType_cycle x

@@ -24,7 +24,7 @@ tests = testGroup "Aws.CloudFront.Types"
 parseInvalidationTests :: TestTree
 parseInvalidationTests = testGroup "parseInvalidation"
   [ testCase "it parses the example xml" $ do
-      res <- runEitherT =<< parseFixture "Invalidation.xml" parseInvalidation
+      res <- runExceptT =<< parseFixture "Invalidation.xml" parseInvalidation
       res @?= Right expectedInvalidation
   ]
 
