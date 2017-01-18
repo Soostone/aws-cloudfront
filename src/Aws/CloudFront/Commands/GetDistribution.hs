@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP                   #-}
 {-# LANGUAGE DeriveDataTypeable    #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -56,11 +57,15 @@ instance AsMemoryResponse GetDistributionResponse where
 
 instance ResponseConsumer r GetDistributionResponse where
   type ResponseMetadata GetDistributionResponse = CloudFrontMetadata
+#if MIN_VERSION_aws(0,15,0)
+  responseConsumer _ _ = cloudFrontXmlResponseConsumer p
+#else
   responseConsumer _ = cloudFrontXmlResponseConsumer p
+#endif
     where
       p cursor = do
         res <- runExceptT $ parseDistributionSummary cursor
         case res of
-          Left e -> decodeError $ formatError e
+          Left e  -> decodeError $ formatError e
           Right r -> return $ GetDistributionResponse r
       formatError e = "Failed to parse cloudfront response: " <> (T.pack . show) e

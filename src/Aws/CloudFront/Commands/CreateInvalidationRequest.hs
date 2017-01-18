@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP                        #-}
 {-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -99,12 +100,16 @@ instance AsMemoryResponse CreateInvalidationResponse where
 
 instance ResponseConsumer r CreateInvalidationResponse where
   type ResponseMetadata CreateInvalidationResponse = CloudFrontMetadata
+#if MIN_VERSION_aws(0,15,0)
+  responseConsumer _ _ = cloudFrontXmlResponseConsumer p
+#else
   responseConsumer _ = cloudFrontXmlResponseConsumer p
+#endif
     where
       p cursor = do
         res <- runExceptT $ parseInvalidation cursor
         case res of
-          Left e -> decodeError $ formatError e
+          Left e  -> decodeError $ formatError e
           Right r -> return $ CreateInvalidationResponse r
       formatError e = "Failed to parse cloudfront response: " <> (T.pack . show) e
 

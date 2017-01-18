@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP                   #-}
 {-# LANGUAGE DeriveDataTypeable    #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -65,12 +66,16 @@ instance AsMemoryResponse GetDistributionListResponse where
 --TODO: extract this implemention to Core, parameterized on parser
 instance ResponseConsumer r GetDistributionListResponse where
   type ResponseMetadata GetDistributionListResponse = CloudFrontMetadata
+#if MIN_VERSION_aws(0,15,0)
+  responseConsumer _ _ = cloudFrontXmlResponseConsumer p
+#else
   responseConsumer _ = cloudFrontXmlResponseConsumer p
+#endif
     where
       p cursor = do
         res <- runExceptT $ parseDistributionListResponse cursor
         case res of
-          Left e -> decodeError $ formatError e
+          Left e  -> decodeError $ formatError e
           Right r -> return r
       formatError e = "Failed to parse cloudfront response: " <> (T.pack . show) e
       --TODO: probably extract
