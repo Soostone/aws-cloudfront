@@ -28,12 +28,12 @@ library
                     , Aws.CloudFront.Commands.GetInvalidationRequest
                     , Aws.CloudFront.Util
   build-depends:       base >= 4.6 && < 5
-                     , aws  >= 0.10  && < 0.16
+                     , aws  >= 0.10  && < 0.17
                      , aws-general >= 0.2
                      , http-types
                      , semigroups
-                     , xml-conduit >= 1.2 && < 1.5
-                     , http-conduit >= 2.0 && < 2.2
+                     , xml-conduit >= 1.2 && < 1.6
+                     , http-conduit >= 2.0 && < 2.3
                      , text >= 0.11
                      , bytestring >= 0.10
                      , blaze-builder
@@ -41,7 +41,7 @@ library
                      , parsers
                      , resourcet
                      , exceptions
-                     , errors >= 2.0 && < 2.2
+                     , errors >= 2.0 && < 2.3
                      , time
                      , time-locale-compat
                      , old-locale
