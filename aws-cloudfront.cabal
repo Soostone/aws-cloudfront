@@ -28,7 +28,7 @@ library
                     , Aws.CloudFront.Commands.GetInvalidationRequest
                     , Aws.CloudFront.Util
   build-depends:       base >= 4.6 && < 5
-                     , aws  >= 0.10  && < 0.17
+                     , aws  >= 0.10  && < 0.18
                      , aws-general >= 0.2
                      , http-types
                      , semigroups
