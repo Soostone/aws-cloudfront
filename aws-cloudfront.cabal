@@ -28,11 +28,11 @@ library
                     , Aws.CloudFront.Commands.GetInvalidationRequest
                     , Aws.CloudFront.Util
   build-depends:       base >= 4.6 && < 5
-                     , aws  >= 0.10  && < 0.18
+                     , aws  >= 0.10
                      , aws-general >= 0.2
                      , http-types
                      , semigroups
-                     , xml-conduit >= 1.2 && < 1.6
+                     , xml-conduit >= 1.2
                      , http-conduit >= 2.0 && < 2.3
                      , text >= 0.11
                      , bytestring >= 0.10
