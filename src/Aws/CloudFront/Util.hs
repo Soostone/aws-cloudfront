@@ -106,7 +106,7 @@ instance AwsType AWSUTCTime where
     where
       parse' = do
         s <- parseString
-        maybe (fail $ "could not parse UTCTime string " <> s) return $ parseTime LC.defaultTimeLocale awsTimeFmt s
+        maybe (fail $ "could not parse UTCTime string " <> s) return $ parseTimeM True LC.defaultTimeLocale awsTimeFmt s
 
 
 -------------------------------------------------------------------------------

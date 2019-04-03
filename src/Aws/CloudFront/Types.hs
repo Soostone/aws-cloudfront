@@ -83,7 +83,8 @@ import           Data.Char
 import           Data.Ix
 import           Data.List               (sort)
 import           Data.List.NonEmpty      (NonEmpty (..))
-import           Data.Monoid
+import           Data.Monoid             as Monoid
+import           Data.Semigroup          as Semigroup
 import           Data.String
 import           Data.Text               (Text)
 import qualified Data.Text               as T
@@ -137,7 +138,7 @@ ftNonEmpty cursor n = do
   xs <- ftList cursor n
   case xs of
     (h:tl) -> return $ h :| tl
-    _ -> decodeError $ "Expected at least 1 " <> n
+    _      -> decodeError $ "Expected at least 1 " <> n
 
 
 -------------------------------------------------------------------------------
@@ -165,7 +166,7 @@ instance AwsType Marker where
 --TODO: smart constructor nonempty, leading slash, urlencode
 newtype ObjectPath = ObjectPath {
       objectPathText :: Text
-    } deriving (Show, Eq, Ord, Monoid, Typeable)
+    } deriving (Show, Eq, Ord, Semigroup.Semigroup, Monoid.Monoid, Typeable)
 
 instance AwsType ObjectPath where
   toText = toTextText . objectPathText
@@ -199,7 +200,7 @@ instance AwsType BucketName where
 -- | Unique identifier for a batch
 newtype CreateInvalidationRequestReference = CreateInvalidationRequestReference {
     createInvalidationRequestReferenceText :: Text
-  } deriving (Show, Eq, Ord, Monoid, Typeable)
+  } deriving (Show, Eq, Ord, Semigroup, Monoid, Typeable)
 
 
 instance AwsType CreateInvalidationRequestReference where
@@ -228,7 +229,7 @@ data InvalidationStatus = InvalidationInProgress
 
 instance AwsType InvalidationStatus where
   toText InvalidationInProgress = "InProgress"
-  toText InvalidationCompleted = "Completed"
+  toText InvalidationCompleted  = "Completed"
   parse = (parseInProgress <|> parseCompleted) <?> "parse InvalidationStatus"
     where
       parseInProgress = PC.text "InProgress" *> pure InvalidationInProgress
@@ -266,7 +267,7 @@ parseInvalidation cursor = do
               &/ X.content
   pathsNE <- case paths of
     (x:xs) -> hoistEither (traverse fromText' $ x :| xs)
-    _ -> throwE "Empty Paths tag"
+    _      -> throwE "Empty Paths tag"
   return Invalidation { invStatus = stat
                       , invPaths = pathsNE
                       , invCallerReference = cref
@@ -314,7 +315,7 @@ data DistributionStatus = DistributionDeployed
 
 
 instance AwsType DistributionStatus where
-  toText DistributionDeployed = "Deployed"
+  toText DistributionDeployed   = "Deployed"
   toText DistributionInProgress = "InProgress"
   parse = ((DistributionDeployed <$ PC.text "Deployed") <|>
           (DistributionInProgress <$ PC.text "InProgress")) <?> "parse DistributionStatus"
@@ -469,7 +470,7 @@ data AccountNumber = SelfAccountNumber
 
 
 instance AwsType AccountNumber where
-  toText SelfAccountNumber = "self"
+  toText SelfAccountNumber      = "self"
   toText (OtherAccountNumber i) = toText i
   parse = ((SelfAccountNumber <$ PC.text "self") <|>
           (OtherAccountNumber <$> parse)) <?> "parse AccountNumber"

@@ -33,19 +33,19 @@ library
                      , http-types
                      , semigroups
                      , xml-conduit >= 1.2
-                     , http-conduit >= 2.0 && < 2.3
+                     , http-conduit >= 2.0
                      , text >= 0.11
                      , bytestring >= 0.10
                      , blaze-builder
-                     , transformers >= 0.3 && < 0.6
+                     , transformers >= 0.3
                      , parsers
                      , resourcet
                      , exceptions
-                     , errors >= 2.0 && < 2.3
-                     , time
+                     , errors >= 2.0
+                     , time >= 1.5
                      , time-locale-compat
                      , old-locale
-                     , conduit
+                     , conduit >= 1.2.1
                      , containers
                      , data-default >= 0.5.3
 

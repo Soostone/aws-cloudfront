@@ -15,10 +15,11 @@ import           Control.Monad.Catch
 import           Control.Monad.IO.Class
 import           Data.ByteString          (ByteString)
 import qualified Data.ByteString          as B
-import           Data.Conduit             (($$+-))
+import           Data.Conduit             (runConduit, (.|))
 import           Data.IORef
 import           Data.Maybe
-import           Data.Monoid
+import           Data.Monoid              as Monoid
+import           Data.Semigroup           as Semigroup
 import           Data.String
 import           Data.Text                (Text)
 import qualified Data.Text.Encoding       as T
@@ -46,9 +47,12 @@ instance Loggable CloudFrontMetadata where
         "CloudFront: request ID=" <> fromMaybe "<none>" rid
         <> ", x-amz-id-2=" <> fromMaybe "<none>" id2
 
-instance Monoid CloudFrontMetadata where
+instance Semigroup.Semigroup CloudFrontMetadata where
+    CloudFrontMetadata id1 r1 <> CloudFrontMetadata id2 r2 = CloudFrontMetadata (id1 <|> id2) (r1 <|> r2)
+
+instance Monoid.Monoid CloudFrontMetadata where
     mempty = CloudFrontMetadata Nothing Nothing
-    CloudFrontMetadata id1 r1 `mappend` CloudFrontMetadata id2 r2 = CloudFrontMetadata (id1 <|> id2) (r1 <|> r2)
+    mappend = (<>)
 
 
 -------------------------------------------------------------------------------
@@ -86,7 +90,7 @@ cloudFrontResponseConsumer inner metadata resp = do
 --TODO: verify this error format
 cloudFrontErrorResponseConsumer :: HTTPResponseConsumer a
 cloudFrontErrorResponseConsumer resp = do
-    doc <- HTTP.responseBody resp $$+- X.sinkDoc X.def
+    doc <- runConduit (HTTP.responseBody resp .| X.sinkDoc X.def)
     case parseError (fromDocument doc) of
         Right err -> liftIO $ throwM err
         Left otherErr -> do
@@ -187,7 +191,7 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
 #if MIN_VERSION_aws(0,9,2)
     cred2cred (Credentials a b c _) = SignatureV4Credentials a b c Nothing
 #else
-    cred2cred (Credentials a b c) = SignatureV4Credentials a b c Nothing
+    cred2cred (Credentials a b c)   = SignatureV4Credentials a b c Nothing
 #endif
 
 
