@@ -56,7 +56,18 @@ instance Monoid.Monoid CloudFrontMetadata where
 
 
 -------------------------------------------------------------------------------
-data CloudFrontConfiguration qt = CloudFrontConfiguration
+data CloudFrontConfiguration qt = CloudFrontConfiguration {
+      _cloudFrontConfiguration_host :: Text
+    , _cloudFrontConfiguration_port :: Int
+    , _cloudFrontConfiguration_protocol :: Protocol
+    }
+
+
+-------------------------------------------------------------------------------
+defCloudFrontConfig :: CloudFrontConfiguration qt
+defCloudFrontConfig =
+    CloudFrontConfiguration "cloudfront.amazonaws.com" 443 HTTPS
+
 
 -------------------------------------------------------------------------------
 cloudFrontXmlResponseConsumer
@@ -126,11 +137,11 @@ cloudFrontSignQuery
     -> CloudFrontConfiguration qt
     -> SignatureData
     -> SignedQuery
-cloudFrontSignQuery query _conf sigData = SignedQuery {
+cloudFrontSignQuery query cfConf sigData = SignedQuery {
       sqMethod = method
-    , sqProtocol = HTTPS
+    , sqProtocol = _cloudFrontConfiguration_protocol cfConf
     , sqHost = host
-    , sqPort = 443
+    , sqPort = _cloudFrontConfiguration_port cfConf
     , sqPath = BB.toByteString $ HTTP.encodePathSegments path
     , sqQuery = HTTP.queryTextToQuery unsignedQuery
     , sqDate = Nothing
@@ -146,7 +157,7 @@ cloudFrontSignQuery query _conf sigData = SignedQuery {
     action = cloudFrontQueryAction query
     path = apiVersion:(cloudFrontQueryPathSegments query)
     apiVersion = "2014-11-06"
-    host = "cloudfront.amazonaws.com"
+    host = T.encodeUtf8 $ _cloudFrontConfiguration_host cfConf
     headers = [("host", host)]
     contentType = case cloudFrontQueryMethod query of
         Post      -> Just "application/xml"
