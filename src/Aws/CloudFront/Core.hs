@@ -57,7 +57,7 @@ instance Monoid.Monoid CloudFrontMetadata where
 
 -------------------------------------------------------------------------------
 data CloudFrontConfiguration qt = CloudFrontConfiguration {
-      _cloudFrontConfiguration_host :: Text
+      _cloudFrontConfiguration_host :: ByteString
     , _cloudFrontConfiguration_port :: Int
     , _cloudFrontConfiguration_protocol :: Protocol
     }
@@ -157,7 +157,7 @@ cloudFrontSignQuery query cfConf sigData = SignedQuery {
     action = cloudFrontQueryAction query
     path = apiVersion:(cloudFrontQueryPathSegments query)
     apiVersion = "2014-11-06"
-    host = T.encodeUtf8 $ _cloudFrontConfiguration_host cfConf
+    host = _cloudFrontConfiguration_host cfConf
     headers = [("host", host)]
     contentType = case cloudFrontQueryMethod query of
         Post      -> Just "application/xml"
