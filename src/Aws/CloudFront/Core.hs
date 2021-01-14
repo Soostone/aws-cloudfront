@@ -56,6 +56,8 @@ instance Monoid.Monoid CloudFrontMetadata where
 
 
 -------------------------------------------------------------------------------
+-- | Phantom type parameter is not used, but it is required for implementing
+-- class SignQuery from aws library
 data CloudFrontConfiguration qt = CloudFrontConfiguration {
       _cloudFrontConfiguration_host :: ByteString
     , _cloudFrontConfiguration_port :: Int
