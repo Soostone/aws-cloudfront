@@ -15,6 +15,8 @@ import           Data.String
 import           Data.Text               (Text)
 import qualified Data.Text               as T
 import           Data.Time
+import qualified Data.Time.Format.Internal as TI
+import qualified Data.Proxy as P
 import qualified Data.Time.Locale.Compat as LC
 import           System.Locale
 import qualified Text.Parser.Char        as PC
@@ -96,8 +98,11 @@ le = X.laxElement
 -------------------------------------------------------------------------------
 newtype AWSUTCTime = AWSUTCTime {
       unAWSUTCTime :: UTCTime
-    } deriving (ParseTime, Show, Eq)
+    } deriving (Show, Eq)
 
+instance TI.ParseTime AWSUTCTime where
+  parseTimeSpecifier _ = TI.parseTimeSpecifier (P.Proxy :: P.Proxy UTCTime)
+  buildTime l xs = AWSUTCTime <$> TI.buildTime l xs
 
 -------------------------------------------------------------------------------
 instance AwsType AWSUTCTime where
